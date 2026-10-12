@@ -129,6 +129,17 @@ cambia("$('finEnvio').textContent = CASO ? 'Enviando el resultado al gabinete…
 cambia("envia(false).then(function (r) { $('finEnvio').textContent = r === 'ok' ? '✔ Resultado enviado al gabinete.' : (r === 'cola' ? 'Guardado: se enviará cuando haya conexión.' : 'Resultado guardado solo en este aparato.'); });",
        "envia(false);")
 
+# --- la hoja «antes de irte» y la tarjeta dentro de la pausa ---
+DESPEDIDA = ('<div class="despedida" id="vDespedida" role="dialog" aria-label="Antes de irte">'
+             '<div class="despedida-caja"><button type="button" id="dCerrar" class="despedida-x" aria-label="Cerrar">✕</button>'
+             '<p class="despedida-t">Antes de irte…</p>'
+             + boton('despedida', 'Llévate más juegos como este', 'Están en ColmenIA, la comunidad de más de 170 logopedas y maestras. Es gratis.')
+             + '</div></div>\n')
+cambia('<script src="snake-voz/indice.js"></script>', DESPEDIDA + '<script src="snake-voz/indice.js"></script>')
+cambia('<button class="btn s" id="bAcabar" type="button">Terminar la tanda</button></div></div>',
+       '<button class="btn s" id="bAcabar" type="button">Terminar la tanda</button>'
+       + boton('pausa', '¿Te vas? Llévate más juegos', 'En ColmenIA, la comunidad de logopedas y maestras. Es gratis.') + '</div></div>')
+
 # --- el guion de lo añadido, dentro de la página ---
 cambia('</body>', '<script>\n' + (AQUI / 'extra.js').read_text(encoding='utf-8') + '</script>\n</body>')
 

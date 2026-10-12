@@ -41,6 +41,9 @@
   <div class="caja"><b id="n_skool_portada">…</b><span>desde la portada</span></div>
   <div class="caja"><b id="n_skool_final">…</b><span>al acabar una tanda</span></div>
   <div class="caja"><b id="n_skool_idea">…</b><span>desde «¿echas algo en falta?»</span></div>
+  <div class="caja"><b id="n_skool_pausa">…</b><span>desde la pausa</span></div>
+  <div class="caja"><b id="n_skool_despedida">…</b><span>desde «antes de irte»</span></div>
+  <div class="caja"><b id="n_despedida_vista">…</b><span>veces que ha salido «antes de irte»</span></div>
 </div>
 
 <h2>¿Lo usan las logopedas?</h2>
@@ -52,7 +55,7 @@
 </div>
 
 <h2>Últimos 7 días</h2>
-<p class="nota" id="cargando">Los números van llegando poco a poco (unos 20 segundos).</p>
+<p class="nota" id="cargando">Los números van llegando poco a poco (unos 25 segundos).</p>
 <table><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th><th>A Skool</th></tr></thead><tbody id="dias"></tbody></table>
 
 <p style="margin-top:18px"><button type="button" onclick="location.reload()">↻ Actualizar</button></p>
@@ -84,12 +87,13 @@
   function pon(id, v) { document.getElementById(id).textContent = v === null ? '—' : v; }
   var d0 = new Date(); document.getElementById('hora').textContent = 'Mirado el ' + d0.toLocaleDateString('es-ES') + ' a las ' + d0.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + '.';
   [['n_personas', 'snake_personas'], ['n_aperturas', 'snake_aperturas'], ['n_partidas', 'snake_partidas'], ['n_tandas', 'snake_tandas_terminadas'],
-   ['n_skool_personas', 'snake_skool_personas'], ['n_skool_portada', 'snake_skool_portada'], ['n_skool_final', 'snake_skool_final'],
+   ['n_skool_personas', 'snake_skool_personas'], ['n_skool_portada', 'snake_skool_portada'], ['n_skool_final', 'snake_skool_final'], ['n_despedida_vista', 'snake_despedida_vista'],
    ['n_preparada', 'snake_partida_preparada'], ['n_enlace', 'snake_enlace_familia'], ['n_familia', 'snake_aperturas_enlace_familia'], ['n_informe', 'snake_informe_compartido']
   ].forEach(function (p) { lee(p[1]).then(function (v) { pon(p[0], v); }); });
-  Promise.all(['snake_skool_portada', 'snake_skool_final', 'snake_skool_idea_portada', 'snake_skool_idea_final'].map(lee)).then(function (v) {
+  Promise.all(['snake_skool_portada', 'snake_skool_final', 'snake_skool_idea_portada', 'snake_skool_idea_final', 'snake_skool_pausa', 'snake_skool_despedida'].map(lee)).then(function (v) {
     var n = function (x) { return x || 0; };
-    pon('n_skool', n(v[0]) + n(v[1]) + n(v[2]) + n(v[3])); pon('n_skool_idea', n(v[2]) + n(v[3]));
+    pon('n_skool', n(v[0]) + n(v[1]) + n(v[2]) + n(v[3]) + n(v[4]) + n(v[5])); pon('n_skool_idea', n(v[2]) + n(v[3]));
+    pon('n_skool_pausa', n(v[4])); pon('n_skool_despedida', n(v[5]));
   });
   var dias = [], hoy = new Date();
   for (var i = 0; i < 7; i++) { var d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i); dias.push(d); }

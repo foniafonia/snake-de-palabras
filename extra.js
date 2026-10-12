@@ -56,6 +56,30 @@
     if (!w) setTimeout(function () { location.href = destino; }, 350);
   }; })(enl[i]));
 
+  /* ---------- antes de irse ---------- */
+  /* No se puede enseñar nada al cerrar la pestaña (el navegador no deja, y en el móvil ni avisa).
+     Sí se pueden pillar los momentos en que se van: en el ordenador, cuando el ratón sube hacia
+     las pestañas; en el móvil, cuando vuelven tras haber salido un rato; y al parar la partida.
+     Una sola vez por visita, nunca en mitad de una partida y nunca en los enlaces de familia
+     (ahí juega un niño). */
+  (function () {
+    var hoja = $('vDespedida'); if (!hoja) return;
+    var FAM = document.body.className.indexOf('fijado') >= 0, visto = false, fuera = 0;
+    function jugando() { return $('dpad').className === 'on' && $('vPausa').className.indexOf(' on') < 0 && $('vFin').className.indexOf(' on') < 0; }
+    function muestra(por) {
+      if (visto || FAM || jugando()) return;
+      try { if (localStorage.getItem('snake-fue-a-skool')) return; } catch (e) { }
+      visto = true; hoja.className = 'despedida on'; suma('snake_despedida_vista'); suma('snake_despedida_' + por);
+    }
+    $('dCerrar').onclick = function () { hoja.className = 'despedida'; };
+    document.addEventListener('mouseout', function (e) { if (!e.relatedTarget && e.clientY <= 0) muestra('raton'); });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) fuera = Date.now();
+      else if (fuera && Date.now() - fuera > 8000) setTimeout(function () { muestra('vuelta'); }, 600);
+    });
+    /* al parar la partida (pausa) también es un buen momento: la tarjeta va dentro de la pausa */
+  })();
+
   /* ---------- palabras propias ---------- */
   /* Cuenta sílabas en castellano de forma aproximada: cada grupo de vocales es una sílaba,
      salvo que se junten dos fuertes (a, e, o) o haya una débil con tilde (í, ú), que se separan.
