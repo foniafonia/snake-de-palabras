@@ -27,7 +27,9 @@ cambia('<title>Snake de palabras · Gabinete Fönia</title>',
        '<title>Snake de palabras · ColmenIA</title>\n'
        '<meta name="description" content="Juego gratis de lectura: la serpiente solo come las palabras que cumplen la regla (empiezan por R, tienen dos sílabas…). Hecho en el laboratorio de Gabinete Fönia, lo entrega ColmenIA.">\n'
        '<meta property="og:title" content="Snake de palabras · juego gratis de lectura">\n'
-       '<meta property="og:description" content="La serpiente solo come las palabras que cumplen la regla. Tú eliges la regla.">')
+       '<meta property="og:description" content="La serpiente solo come las palabras que cumplen la regla. Tú eliges la regla.">\n'
+       '<meta property="og:image" content="https://foniafonia.github.io/snake-de-palabras/portada/portada-ancha.jpg">\n'
+       '<meta property="og:type" content="website">\n<meta name="twitter:card" content="summary_large_image">')
 cambia('<link rel="icon" href="../equipo/icono-192.png">',
        '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🐍%3C/text%3E%3C/svg%3E">')
 
@@ -57,12 +59,13 @@ def boton(donde, titulo, sub):
 def idea(donde):
     return ('<a class="idea" data-skool="%s" href="%s" target="_blank" rel="noopener">💡 ¿Echas algo en falta o has visto un fallo? Cuéntalo en la comunidad</a>' % (donde, SKOOL))
 
-PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta">
-      <h1>🐍 Snake de palabras</h1>
+PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta conportada">
+      <img class="heroe" src="portada/portada-ancha.jpg" width="1280" height="720" alt="Una serpiente verde va hacia la palabra RANA y deja a un lado luna, mesa y pato">
+      <h1>Snake de palabras</h1>
       <p class="lema">La serpiente solo come las palabras que cumplen <b>tu regla</b>. Y al acabar te dice qué letras confunde.</p>
       <ul class="trabaja"><li>Lectura de palabras</li><li>Conciencia fonológica</li><li>Letras que se confunden</li><li>Sílabas</li><li>Atención</li></ul>
       <p style="font-size:15px;margin:0 0 10px">De 5 a 12 años · móvil, tableta u ordenador · 241 palabras con voz · sin registro</p>
-      <button class="btn ancho" id="pJugar" type="button">▶ Jugar ya</button>
+      <button class="btnimg" id="pJugar" type="button" aria-label="Jugar ya"><img class="normal" src="portada/boton-jugar.png" width="720" height="280" alt=""><img class="pulsado" src="portada/boton-jugar-pulsado.png" width="720" height="280" alt=""></button>
       <button class="btn s ancho" id="pPrepara" type="button">🧑‍⚕️ Preparar una partida<small>Elige el objetivo y manda el enlace a la familia</small></button>
       """ + boton('portada', '🐝 Más juegos como este', 'Gratis, en la comunidad de logopedas de ColmenIA') + """
       """ + idea('idea_portada') + """

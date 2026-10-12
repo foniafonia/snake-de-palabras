@@ -9,6 +9,9 @@
 <meta name="description" content="Juego gratis de lectura: la serpiente solo come las palabras que cumplen la regla (empiezan por R, tienen dos sílabas…). Hecho en el laboratorio de Gabinete Fönia, lo entrega ColmenIA.">
 <meta property="og:title" content="Snake de palabras · juego gratis de lectura">
 <meta property="og:description" content="La serpiente solo come las palabras que cumplen la regla. Tú eliges la regla.">
+<meta property="og:image" content="https://foniafonia.github.io/snake-de-palabras/portada/portada-ancha.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🐍%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet">
@@ -100,6 +103,15 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
 .informe dd{margin:0;font-size:16px;line-height:1.35}
 .informe dd.clave{font-weight:700}
 .ok-copia{font-size:14px;color:#2d5a41;min-height:1.2em;text-align:center;margin:4px 0 0!important}
+/* portada ilustrada (imágenes de Codex, 12/10/2026) */
+.tarjeta.conportada{padding-top:0;overflow:hidden}
+.heroe{display:block;width:calc(100% + 48px);max-width:none;height:auto;margin:0 -24px 12px}
+.btnimg{display:block;width:100%;max-width:400px;margin:2px auto 6px;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btnimg img{display:block;width:100%;height:auto}
+.btnimg .pulsado{display:none}
+.btnimg:active .normal{display:none}.btnimg:active .pulsado{display:block}
+.btnimg:focus-visible{outline:4px solid var(--oro);outline-offset:2px;border-radius:40px}
+@media (max-width:640px){.heroe{width:calc(100% + 28px);margin:0 -14px 10px}}
 </style>
 </head>
 <body>
@@ -117,12 +129,13 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
     <canvas id="c" aria-label="Tablero del juego"></canvas>
     <div id="dpad"><button class="u" type="button" aria-label="Arriba">▲</button><button class="l" type="button" aria-label="Izquierda">◀</button><button class="r" type="button" aria-label="Derecha">▶</button><button class="d" type="button" aria-label="Abajo">▼</button></div>
 
-    <div class="velo" id="vPortada"><div class="tarjeta">
-      <h1>🐍 Snake de palabras</h1>
+    <div class="velo" id="vPortada"><div class="tarjeta conportada">
+      <img class="heroe" src="portada/portada-ancha.jpg" width="1280" height="720" alt="Una serpiente verde va hacia la palabra RANA y deja a un lado luna, mesa y pato">
+      <h1>Snake de palabras</h1>
       <p class="lema">La serpiente solo come las palabras que cumplen <b>tu regla</b>. Y al acabar te dice qué letras confunde.</p>
       <ul class="trabaja"><li>Lectura de palabras</li><li>Conciencia fonológica</li><li>Letras que se confunden</li><li>Sílabas</li><li>Atención</li></ul>
       <p style="font-size:15px;margin:0 0 10px">De 5 a 12 años · móvil, tableta u ordenador · 241 palabras con voz · sin registro</p>
-      <button class="btn ancho" id="pJugar" type="button">▶ Jugar ya</button>
+      <button class="btnimg" id="pJugar" type="button" aria-label="Jugar ya"><img class="normal" src="portada/boton-jugar.png" width="720" height="280" alt=""><img class="pulsado" src="portada/boton-jugar-pulsado.png" width="720" height="280" alt=""></button>
       <button class="btn s ancho" id="pPrepara" type="button">🧑‍⚕️ Preparar una partida<small>Elige el objetivo y manda el enlace a la familia</small></button>
       <a class="cta" data-skool="portada" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener">🐝 Más juegos como este<small>Gratis, en la comunidad de logopedas de ColmenIA</small></a>
       <a class="idea" data-skool="idea_portada" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener">💡 ¿Echas algo en falta o has visto un fallo? Cuéntalo en la comunidad</a>

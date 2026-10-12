@@ -30,3 +30,12 @@
 .informe dd{margin:0;font-size:16px;line-height:1.35}
 .informe dd.clave{font-weight:700}
 .ok-copia{font-size:14px;color:#2d5a41;min-height:1.2em;text-align:center;margin:4px 0 0!important}
+/* portada ilustrada (imágenes de Codex, 12/10/2026) */
+.tarjeta.conportada{padding-top:0;overflow:hidden}
+.heroe{display:block;width:calc(100% + 48px);max-width:none;height:auto;margin:0 -24px 12px}
+.btnimg{display:block;width:100%;max-width:400px;margin:2px auto 6px;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btnimg img{display:block;width:100%;height:auto}
+.btnimg .pulsado{display:none}
+.btnimg:active .normal{display:none}.btnimg:active .pulsado{display:block}
+.btnimg:focus-visible{outline:4px solid var(--oro);outline-offset:2px;border-radius:40px}
+@media (max-width:640px){.heroe{width:calc(100% + 28px);margin:0 -14px 10px}}
