@@ -1,0 +1,32 @@
+/* Lo que la versión pública añade al juego de Fönia: portada, «Prepara la partida» e informe. */
+.cta{display:block;margin:14px auto 0;padding:13px 16px;border-radius:16px;background:#1d2b22;color:#fff8e7!important;font-family:var(--titulo);font-weight:600;font-size:18px;line-height:1.25;text-decoration:none;text-align:center;max-width:420px}
+.cta small{display:block;font-family:inherit;font-weight:400;font-size:14px;opacity:.85;margin-top:2px}
+.firma{font-size:13px!important;color:#4d6457;margin-top:10px!important}
+.idea{display:inline-block;margin-top:10px;font-size:15px;color:#2d5a41!important;text-decoration:underline}
+.lema{font-size:19px!important;margin:4px 0 12px!important}
+.trabaja{display:flex;flex-wrap:wrap;justify-content:center;margin:6px 0 12px;padding:0;list-style:none}
+.trabaja li{background:#fff;border:2px solid #cfd8d2;border-radius:99px;padding:5px 12px;margin:3px;font-size:15px;font-weight:700}
+.btn.ancho{display:block;width:100%;max-width:420px;margin:8px auto}
+.btn.ancho small{display:block;font-weight:400;font-size:14px;opacity:.9}
+.prep{text-align:left}
+.prep h1{text-align:center}
+.prep h2{font-family:var(--titulo);font-size:19px;margin:16px 0 6px}
+.objs{display:flex;flex-wrap:wrap}
+.objs button{flex:1 1 150px;margin:3px;padding:9px 10px;border-radius:14px;border:2px solid #cfd8d2;background:#fff;font:inherit;font-weight:700;font-size:16px;line-height:1.2;text-align:left;cursor:pointer;color:var(--tinta)}
+.objs button small{display:block;font-weight:400;font-size:13px;color:#4d6457}
+.objs button.on{border-color:var(--verde);background:#e3f3e8}
+.fila2{display:flex;flex-wrap:wrap}.fila2 .campo{flex:1 1 130px;margin:6px 4px}
+.prep textarea{width:100%;min-height:64px;font:inherit;font-size:17px;padding:9px;border-radius:12px;border:2px solid #cfd8d2;box-sizing:border-box}
+.prep .resumen{background:var(--oro);border-radius:14px;padding:9px 12px;margin:14px 0 6px;font-weight:700;text-align:center}
+.enlace{display:none;background:#fff;border:2px solid #cfd8d2;border-radius:14px;padding:10px;margin-top:10px}
+.enlace.on{display:block}
+.enlace input{width:100%;font:inherit;font-size:14px;padding:8px;border-radius:10px;border:1px solid #cfd8d2;box-sizing:border-box}
+.minis{text-align:center;margin-top:6px}
+.btn.mini{font-size:16px;padding:9px 14px;margin:4px 3px}
+.informe{text-align:left;background:#fff;border:2px solid #cfd8d2;border-radius:16px;padding:10px 12px;margin:12px 0 4px}
+.informe h2{font-family:var(--titulo);font-size:18px;margin:0 0 6px}
+.informe dl{margin:0}
+.informe dt{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#4d6457;margin-top:7px}
+.informe dd{margin:0;font-size:16px;line-height:1.35}
+.informe dd.clave{font-weight:700}
+.ok-copia{font-size:14px;color:#2d5a41;min-height:1.2em;text-align:center;margin:4px 0 0!important}

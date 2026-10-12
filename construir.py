@@ -13,7 +13,6 @@ ORIGEN = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else
                       pathlib.Path.home() / 'Developer/simulaciones-interactivas/.claude/worktrees/rotacismo-paquete')
 AQUI = pathlib.Path(__file__).resolve().parent
 SKOOL = 'https://www.skool.com/logopedia-7339/about'
-CONTADOR = 'https://abacus.jasoncameron.dev/hit/foniafonia-juegos/'
 
 s = (ORIGEN / 'lectoescritura/snake-de-palabras.html').read_text(encoding='utf-8')
 
@@ -47,32 +46,82 @@ cambia("(function () { leeCola().forEach(", "if (false) (function () { leeCola()
 cambia('@media (max-width:640px){#regla .etq{display:none}',
        '@media (max-width:640px){#hud{flex-wrap:wrap}#regla{flex:1 0 100%;justify-content:center;margin-bottom:6px}#regla .chip{white-space:normal;text-align:center}#regla .etq{display:none}')
 
-# --- firma y comunidad ---
-ESTILO = ('.cta{display:block;margin:14px auto 0;padding:13px 16px;border-radius:16px;background:#1d2b22;color:#fff8e7!important;'
-          'font-family:var(--titulo);font-weight:600;font-size:18px;line-height:1.25;text-decoration:none;text-align:center;max-width:420px}'
-          '.cta small{display:block;font-family:inherit;font-weight:400;font-size:14px;opacity:.85;margin-top:2px}'
-          '.firma{font-size:13px!important;color:#4d6457;margin-top:10px!important}\n</style>')
-cambia('</style>', ESTILO)
-BOTON = ('<a class="cta" data-skool="%s" href="' + SKOOL + '" target="_blank" rel="noopener">%s<small>%s</small></a>')
+# --- el juego deja a mano lo que necesita extra.js ---
+cambia("window.__snake = { OPC: OPC,", "window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, OPC: OPC,")
+
+# --- estilos de lo añadido ---
+cambia('</style>', (AQUI / 'extra.css').read_text(encoding='utf-8') + '</style>')
+
+def boton(donde, titulo, sub):
+    return ('<a class="cta" data-skool="%s" href="%s" target="_blank" rel="noopener">%s<small>%s</small></a>' % (donde, SKOOL, titulo, sub))
+def idea(donde):
+    return ('<a class="idea" data-skool="%s" href="%s" target="_blank" rel="noopener">💡 ¿Echas algo en falta o has visto un fallo? Cuéntalo en la comunidad</a>' % (donde, SKOOL))
+
+PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta">
+      <h1>🐍 Snake de palabras</h1>
+      <p class="lema">La serpiente solo come las palabras que cumplen <b>tu regla</b>. Y al acabar te dice qué letras confunde.</p>
+      <ul class="trabaja"><li>Lectura de palabras</li><li>Conciencia fonológica</li><li>Letras que se confunden</li><li>Sílabas</li><li>Atención</li></ul>
+      <p style="font-size:15px;margin:0 0 10px">De 5 a 12 años · móvil, tableta u ordenador · 241 palabras con voz · sin registro</p>
+      <button class="btn ancho" id="pJugar" type="button">▶ Jugar ya</button>
+      <button class="btn s ancho" id="pPrepara" type="button">🧑‍⚕️ Preparar una partida<small>Elige el objetivo y manda el enlace a la familia</small></button>
+      """ + boton('portada', '🐝 Más juegos como este', 'Gratis, en la comunidad de logopedas de ColmenIA') + """
+      """ + idea('idea_portada') + """
+      <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>
+      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda. No guarda ni envía datos.</p>
+    </div></div>
+
+    <div class="velo" id="vPrepara"><div class="tarjeta prep">
+      <h1>🧑‍⚕️ Prepara la partida</h1>
+      <h2>1 · ¿Qué quieres trabajar?</h2>
+      <div class="objs" id="prObjs"></div>
+      <h2>2 · Ajusta, si quieres</h2>
+      <div class="fila2">
+        <div class="campo"><label for="prRegla">Regla</label><select id="prRegla"><option value="empieza">Empiezan por…</option><option value="contiene">Contienen…</option><option value="termina">Terminan en…</option><option value="silabas">Número de sílabas</option><option value="todas">Todas (solo leer)</option></select></div>
+        <div class="campo" id="prCLetra"><label for="prLetra">Letra o grupo</label><select id="prLetra"></select></div>
+        <div class="campo" id="prCSil"><label for="prSil">Sílabas</label><select id="prSil"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o más</option></select></div>
+      </div>
+      <div class="fila2">
+        <div class="campo"><label for="prMeta">Palabras por tanda</label><select id="prMeta"><option>5</option><option>10</option><option>15</option><option>20</option></select></div>
+        <div class="campo"><label for="prNivel">Dificultad</label><select id="prNivel"><option value="auto">Se adapta sola</option><option value="1">1 · muy tranquila</option><option value="2">2</option><option value="3">3</option><option value="4">4 · rápida</option></select></div>
+        <div class="campo"><label for="prVel">Ritmo</label><select id="prVel"><option value="">Normal</option><option value="lenta">Más lento</option></select></div>
+      </div>
+      <h2>3 · Palabras de tu paciente (opcional)</h2>
+      <textarea id="prPropias" placeholder="Escribe las tuyas separadas por comas: rueda, ratón, arroz…" aria-label="Palabras propias"></textarea>
+      <p class="nota" style="text-align:left">Se suman a las 241 del juego y siguen la misma regla. Sin nombres de personas. Estas no tienen voz y sus sílabas se cuentan de forma aproximada.</p>
+      <div class="resumen" id="prResumen"></div>
+      <div style="text-align:center">
+        <button class="btn" id="prJugar" type="button">▶ Jugar ahora</button>
+        <button class="btn s" id="prCrear" type="button">🔗 Enlace para la familia</button>
+      </div>
+      <div class="enlace" id="prEnlace">
+        <label for="prUrl" style="font-weight:700;display:block;margin-bottom:4px">Mándale este enlace. Abre el juego ya preparado, sin ajustes a la vista:</label>
+        <input id="prUrl" type="text" readonly>
+        <div class="minis"><button class="btn mini" id="prCopiar" type="button">📋 Copiar</button><button class="btn s mini" id="prCompartir" type="button">📤 Compartir</button></div>
+        <p class="ok-copia" id="prCopiado" role="status"></p>
+      </div>
+      <div style="text-align:center"><button class="btn s mini" id="prVolver" type="button">← Volver</button></div>
+    </div></div>
+
+"""
+cambia('    <div class="velo on" id="vInicio"><div class="tarjeta">', PORTADA + '    <div class="velo on" id="vInicio"><div class="tarjeta">')
 cambia('      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Pendiente de revisión clínica.</p>',
-       '      ' + BOTON % ('portada', '🐝 Más juegos como este', 'Gratis, en la comunidad de logopedas de ColmenIA') + '\n'
-       '      <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA. Para cambiar la regla, toca ⚙️.</p>\n'
+       '      <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>\n'
        '      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda.</p>')
 cambia('      <p class="nota" id="finEnvio"></p>\n      <button class="btn" id="bOtra" type="button">▶ Otra tanda</button>',
+       '      <div class="informe"><h2>📋 Informe de la tanda</h2><dl id="infFilas"></dl>\n'
+       '        <div class="minis"><button class="btn mini" id="infCompartir" type="button">📤 Enviar a mi logopeda</button><button class="btn s mini" id="infCopiar" type="button">📋 Copiar</button></div>\n'
+       '        <p class="ok-copia" id="infDicho" role="status"></p></div>\n'
        '      <p class="nota" id="finEnvio"></p>\n      <button class="btn" id="bOtra" type="button">▶ Otra tanda</button>\n'
-       '      ' + BOTON % ('final', '🐝 ¿Quieres más juegos como este?', 'Están en la comunidad de logopedas de ColmenIA'))
+       '      <button class="btn s" id="finPrepara" type="button">🧑‍⚕️ Cambiar la partida</button>\n'
+       '      ' + boton('final', '🐝 ¿Quieres más juegos como este?', 'Están en la comunidad de logopedas de ColmenIA') + '\n'
+       '      ' + idea('idea_final'))
 cambia("$('finEnvio').textContent = CASO ? 'Enviando el resultado al gabinete…' : 'Resultado guardado solo en este aparato.';",
-       "$('finEnvio').textContent = 'Nada sale de este aparato: aquí no se guarda ni se envía ningún dato.';")
+       "$('finEnvio').textContent = 'Nada sale de este aparato si no lo compartes tú.';")
 cambia("envia(false).then(function (r) { $('finEnvio').textContent = r === 'ok' ? '✔ Resultado enviado al gabinete.' : (r === 'cola' ? 'Guardado: se enviará cuando haya conexión.' : 'Resultado guardado solo en este aparato.'); });",
        "envia(false);")
 
-# --- contador anónimo: aperturas y toques al botón de la comunidad (sin cuentas ni cookies) ---
-cambia('</body>',
-       '<script>\n(function () {\n  function suma(k) { try { if (window.fetch) fetch(' + repr(CONTADOR) + " + k, { keepalive: true }).catch(function () {}); } catch (e) {} }\n"
-       "  suma('snake_aperturas');\n"
-       "  var b = document.querySelectorAll('a[data-skool]');\n"
-       "  for (var i = 0; i < b.length; i++) b[i].addEventListener('click', (function (d) { return function () { suma('snake_skool_' + d); }; })(b[i].getAttribute('data-skool')));\n"
-       '})();\n</script>\n</body>')
+# --- el guion de lo añadido, dentro de la página ---
+cambia('</body>', '<script>\n' + (AQUI / 'extra.js').read_text(encoding='utf-8') + '</script>\n</body>')
 
 (AQUI / 'index.html').write_text(s, encoding='utf-8')
 voz = AQUI / 'snake-voz'
