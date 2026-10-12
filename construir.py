@@ -55,7 +55,13 @@ cambia("window.__snake = { OPC: OPC,", "window.__snake = { filas: filasPartida, 
 cambia('</style>', (AQUI / 'extra.css').read_text(encoding='utf-8') + '</style>')
 
 def boton(donde, titulo, sub):
-    return ('<a class="cta" data-skool="%s" href="%s" target="_blank" rel="noopener">%s<small>%s</small></a>' % (donde, SKOOL, titulo, sub))
+    """La tarjeta que lleva a la comunidad. Lo que promete es lo que hay: la comunidad es
+    gratuita y tenía 171 miembros el 13/10/2026 (mirado en su página de Skool)."""
+    return ('<a class="cta" data-skool="%s" href="%s" target="_blank" rel="noopener">'
+            '<span class="cta-abeja" aria-hidden="true">🐝</span>'
+            '<span class="cta-txt"><b>%s</b><span>%s</span>'
+            '<span class="cta-lista"><i>🏎️ FonoKart</i><i>🏃 FonoDash</i><i>🐍 y los que van saliendo</i></span></span>'
+            '<span class="cta-ir">Entrar gratis <span aria-hidden="true">→</span></span></a>' % (donde, SKOOL, titulo, sub))
 def idea(donde):
     return ('<a class="idea" data-skool="%s" href="%s" target="_blank" rel="noopener">💡 ¿Echas algo en falta o has visto un fallo? Cuéntalo en la comunidad</a>' % (donde, SKOOL))
 
@@ -67,7 +73,7 @@ PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta conportada"
       <button class="btn s ancho" id="pPrepara" type="button">🧑‍⚕️ Preparar una partida<small>Elige el objetivo y manda el enlace a la familia</small></button>
       <ul class="trabaja"><li>Lectura de palabras</li><li>Conciencia fonológica</li><li>Letras que se confunden</li><li>Sílabas</li><li>Atención</li></ul>
       <p style="font-size:15px;margin:0 0 10px">De 5 a 12 años · móvil, tableta u ordenador · 241 palabras con voz · sin registro</p>
-      """ + boton('portada', '🐝 Más juegos como este', 'Gratis, en la comunidad de logopedas de ColmenIA') + """
+      """ + boton('portada', '¿Te ha gustado? Hay más juegos como este', 'En ColmenIA, la comunidad de más de 170 logopedas y maestras que usan la IA en su trabajo.') + """
       """ + idea('idea_portada') + """
       <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>
       <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda. No guarda ni envía datos.</p>
@@ -116,7 +122,7 @@ cambia('      <p class="nota" id="finEnvio"></p>\n      <button class="btn" id="
        '        <p class="ok-copia" id="infDicho" role="status"></p></div>\n'
        '      <p class="nota" id="finEnvio"></p>\n      <button class="btn" id="bOtra" type="button">▶ Otra tanda</button>\n'
        '      <button class="btn s" id="finPrepara" type="button">🧑‍⚕️ Cambiar la partida</button>\n'
-       '      ' + boton('final', '🐝 ¿Quieres más juegos como este?', 'Están en la comunidad de logopedas de ColmenIA') + '\n'
+       '      ' + boton('final', '¡Tanda hecha! ¿Quieres más juegos así?', 'Están en ColmenIA, la comunidad de más de 170 logopedas y maestras.') + '\n'
        '      ' + idea('idea_final'))
 cambia("$('finEnvio').textContent = CASO ? 'Enviando el resultado al gabinete…' : 'Resultado guardado solo en este aparato.';",
        "$('finEnvio').textContent = 'Nada sale de este aparato si no lo compartes tú.';")
