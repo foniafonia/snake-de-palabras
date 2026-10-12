@@ -734,12 +734,27 @@ window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, 
     if (window.MutationObserver) new MutationObserver(mira).observe(cruz, { attributes: true, attributeFilter: ['class'] }); else setInterval(mira, 700);
   })();
 
+  /* Ir a la comunidad. 13/10: entró una persona desde Telegram y el toque no quedó contado.
+     El navegador de dentro de Telegram (y otros parecidos) cambia de página en la misma
+     pestaña y corta el aviso antes de que salga. Ahora el aviso sale como una imagen (esos
+     navegadores no la cortan con tanta facilidad) y la salida espera un momento:
+     si se puede abrir pestaña nueva, se abre al instante y esta página sigue viva; si no,
+     se sale a los 350 ms, con el aviso ya enviado. */
   var enl = document.querySelectorAll('a[data-skool]');
-  for (var i = 0; i < enl.length; i++) enl[i].addEventListener('click', (function (d) { return function () {
-    suma('snake_skool_' + d); suma('snake_skool_dia_' + hoy());
-    /* además de los toques, cuántos aparatos distintos han ido alguna vez a la comunidad */
-    try { if (!MIO && !localStorage.getItem('snake-fue-a-skool')) { localStorage.setItem('snake-fue-a-skool', hoy()); suma('snake_skool_personas'); } } catch (e) { }
-  }; })(enl[i].getAttribute('data-skool')));
+  for (var i = 0; i < enl.length; i++) enl[i].addEventListener('click', (function (a) { return function (ev) {
+    var d = a.getAttribute('data-skool'), destino = a.href;
+    /* un solo recuento por toque, por el camino seguro; la imagen de respaldo NO se usa a la vez
+       que la petición para no contar doble: va sola */
+    if (!MIO) {
+      try { var im = new Image(); im.src = CONTADOR + 'snake_skool_' + d; } catch (e) { }
+      try { var im2 = new Image(); im2.src = CONTADOR + 'snake_skool_dia_' + hoy(); } catch (e) { }
+      try { if (!localStorage.getItem('snake-fue-a-skool')) { localStorage.setItem('snake-fue-a-skool', hoy()); var im3 = new Image(); im3.src = CONTADOR + 'snake_skool_personas'; } } catch (e) { }
+    }
+    if (ev && ev.preventDefault) ev.preventDefault();
+    var w = null;
+    try { w = window.open(destino, '_blank'); if (w) { try { w.opener = null; } catch (e) { } } } catch (e) { w = null; }
+    if (!w) setTimeout(function () { location.href = destino; }, 350);
+  }; })(enl[i]));
 
   /* ---------- palabras propias ---------- */
   /* Cuenta sílabas en castellano de forma aproximada: cada grupo de vocales es una sílaba,
