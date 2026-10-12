@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0F3D2A">
+<title>Snake de palabras · ColmenIA</title>
+<meta name="description" content="Juego gratis de lectura: la serpiente solo come las palabras que cumplen la regla (empiezan por R, tienen dos sílabas…). Hecho en el laboratorio de Gabinete Fönia, lo entrega ColmenIA.">
+<meta property="og:title" content="Snake de palabras · juego gratis de lectura">
+<meta property="og:description" content="La serpiente solo come las palabras que cumplen la regla. Tú eliges la regla.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🐍%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* SNAKE DE PALABRAS · versión 2 (12/10/2026). Idea del prototipo «Snake 3D · Palabras» de José, rehecha de cero:
+   juego 2D de alta definición, movimiento suave, sin muertes (los fallos enseñan por qué), tandas cortas,
+   dificultad que se adapta sola, voz Piper al comer, y un registro clínico de qué palabras confunde.
+   Pendiente de revisión clínica. Compatible con iPad antiguos: ES2017, sin Pointer Events ni ResizeObserver. */
+:root{
+  --noche:#0E3524; --noche2:#14513A; --hoja:#EAF6EC; --crema:#FFF8E7; --oro:#F4B93A; --oro2:#C98A0B; --verde:#2FA866; --verde2:#1E7B4B;
+  --rojo:#D9483B; --tinta:#10231A; --suave:#B8D9C4;
+  --titulo:'Jost',system-ui,sans-serif; --letra:'Atkinson Hyperlegible',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-family:var(--letra);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#app{position:fixed;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column}
+#hud{flex:none;display:flex;align-items:center;padding:8px 10px;background:linear-gradient(#0A2A1C,#0E3524);border-bottom:2px solid #0A2A1C}
+#regla{flex:1;min-width:0;display:flex;align-items:center}
+#regla .etq{font-size:13px;color:var(--suave);margin-right:10px;line-height:1.1;white-space:nowrap}
+#regla .chip{background:var(--oro);color:var(--tinta);border-radius:14px;padding:5px 14px;font-family:var(--titulo);font-weight:600;font-size:21px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 3px 0 var(--oro2)}
+#regla .chip b{background:var(--tinta);color:var(--oro);border-radius:8px;padding:0 9px;margin:0 3px;font-size:26px}
+.dato{margin-left:12px;text-align:center;min-width:46px}
+.dato span{display:block;font-size:11px;color:var(--suave);text-transform:uppercase;letter-spacing:.04em}
+.dato b{font-family:var(--titulo);font-size:22px;font-weight:600}
+.dato b.racha{color:var(--oro)}
+.bt{border:0;border-radius:12px;background:var(--noche2);color:var(--crema);font:inherit;font-weight:700;padding:0 12px;height:44px;min-width:44px;margin-left:8px;cursor:pointer;font-size:18px}
+.bt:active{transform:translateY(1px)}
+#pista{position:relative;flex:1;min-height:0}
+#c{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+#aviso{flex:none;min-height:42px;display:flex;align-items:center;justify-content:center;background:#0A2A1C;color:var(--suave);padding:4px 12px;font-size:19px;font-weight:700;text-align:center;border-bottom:2px solid #0A2A1C}
+#aviso.on{color:var(--tinta)}
+#aviso.ok{background:#CDEFD7;color:#0C4A2A}#aviso.mal{background:#FBD3CD;color:#7C1D14}#aviso.info{background:#FCE7B0;color:#5B3F00}
+#dpad{position:absolute;right:12px;bottom:12px;width:150px;height:150px;display:none;z-index:4}
+#dpad button{position:absolute;width:50px;height:50px;border:0;border-radius:50%;background:rgba(255,248,231,.22);color:var(--crema);font-size:24px}
+#dpad .u{left:50px;top:0}#dpad .d{left:50px;bottom:0}#dpad .l{left:0;top:50px}#dpad .r{right:0;top:50px}
+@media (pointer:coarse){#dpad.on{display:block}}
+.velo{position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(6,28,19,.82);display:none;align-items:flex-start;justify-content:center;padding:14px;z-index:10;overflow:auto}.velo>.tarjeta{margin:auto}
+.velo.on{display:flex}
+.tarjeta{background:var(--crema);color:var(--tinta);border-radius:24px;padding:22px 24px;max-width:560px;width:100%;box-shadow:0 14px 40px rgba(0,0,0,.4);text-align:center}
+.tarjeta h1{font-family:var(--titulo);font-size:30px;margin:0 0 6px;line-height:1.1}
+.tarjeta p{margin:8px 0;font-size:18px;line-height:1.45}
+.tarjeta .gran{font-family:var(--titulo);font-size:26px;font-weight:600;background:var(--oro);border-radius:16px;padding:10px 14px;margin:12px 0;box-shadow:0 4px 0 var(--oro2)}
+.tarjeta .gran b{background:var(--tinta);color:var(--oro);border-radius:9px;padding:0 10px;font-size:32px}
+.pasos{display:flex;margin:10px 0}.pasos div{flex:1;font-size:15px;padding:0 6px}.pasos i{display:block;font-style:normal;font-size:34px;margin-bottom:4px}
+.btn{border:0;border-radius:16px;font:inherit;font-weight:700;font-size:21px;padding:13px 24px;margin:6px 5px;cursor:pointer;background:var(--verde);color:#fff;box-shadow:0 4px 0 var(--verde2)}
+.btn.s{background:#fff;color:var(--tinta);box-shadow:0 4px 0 #cfd8d2;border:2px solid #cfd8d2}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--verde2)}
+.estrellas{font-size:44px;letter-spacing:6px;color:var(--oro);text-shadow:0 2px 0 var(--oro2)}
+.estrellas i{font-style:normal;color:#d7d2c0;text-shadow:none}
+.res{display:flex;flex-wrap:wrap;justify-content:center;margin:6px 0}.res div{margin:4px 8px;font-size:15px}.res b{display:block;font-family:var(--titulo);font-size:26px}
+.fallos{text-align:left;font-size:16px;margin:6px 0 0;padding-left:20px}
+.nota{font-size:13px!important;color:#4d6457;margin-top:12px!important}
+.campo{margin:12px 0;text-align:left}.campo label{display:block;font-weight:700;margin-bottom:6px}
+.campo select{font:inherit;font-size:18px;padding:9px;border-radius:12px;border:2px solid #cfd8d2;width:100%;background:#fff}
+.letras{display:flex;flex-wrap:wrap}.letras button{width:46px;height:46px;margin:3px;border-radius:12px;border:2px solid #cfd8d2;background:#fff;font-size:20px;font-weight:700;font-family:var(--titulo)}
+.letras button.on{background:var(--oro);border-color:var(--oro2)}
+.fijado #bAjustes{display:none}
+@media (max-width:640px){#hud{flex-wrap:wrap}#regla{flex:1 0 100%;justify-content:center;margin-bottom:6px}#regla .chip{white-space:normal;text-align:center}#regla .etq{display:none}#regla .chip{font-size:17px;padding:4px 10px}#regla .chip b{font-size:21px}.dato{margin-left:7px;min-width:34px}.dato b{font-size:18px}.bt{margin-left:5px;padding:0 9px}.tarjeta{padding:16px 14px}.tarjeta h1{font-size:25px}}
+@media (prefers-reduced-motion:reduce){#aviso{transition:none}}
+.cta{display:block;margin:14px auto 0;padding:13px 16px;border-radius:16px;background:#1d2b22;color:#fff8e7!important;font-family:var(--titulo);font-weight:600;font-size:18px;line-height:1.25;text-decoration:none;text-align:center;max-width:420px}.cta small{display:block;font-family:inherit;font-weight:400;font-size:14px;opacity:.85;margin-top:2px}.firma{font-size:13px!important;color:#4d6457;margin-top:10px!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <div id="regla"><span class="etq">Come<br>solo…</span><span class="chip" id="chipRegla">…</span></div>
+    <div class="dato"><span>Palabras</span><b id="hPunt">0/10</b></div>
+    <div class="dato"><span>Racha</span><b class="racha" id="hRacha">0</b></div>
+    <button class="bt" id="bSonido" type="button" aria-label="Sonido" title="Sonido">🔊</button>
+    <button class="bt" id="bAjustes" type="button" aria-label="Ajustes de la logopeda" title="Ajustes">⚙️</button>
+    <button class="bt" id="bPausa" type="button" aria-label="Pausa" title="Pausa">⏸</button>
+  </div>
+  <div id="aviso" role="status" aria-live="polite"></div>
+  <div id="pista">
+    <canvas id="c" aria-label="Tablero del juego"></canvas>
+    <div id="dpad"><button class="u" type="button" aria-label="Arriba">▲</button><button class="l" type="button" aria-label="Izquierda">◀</button><button class="r" type="button" aria-label="Derecha">▶</button><button class="d" type="button" aria-label="Abajo">▼</button></div>
+
+    <div class="velo on" id="vInicio"><div class="tarjeta">
+      <h1>🐍 Snake de palabras</h1>
+      <div class="gran" id="inicioRegla"></div>
+      <div class="pasos"><div><i>👆</i>Desliza el dedo (o usa las flechas) para mover la serpiente</div><div><i>🔎</i>Lee las palabras del tablero</div><div><i>✅</i>Come <b>solo</b> las que cumplen la regla</div></div>
+      <p>Si comes una que no la cumple, te diré por qué. No pasa nada: ¡sigue!</p>
+      <button class="btn" id="bJugar" type="button">▶ Jugar</button>
+      <a class="cta" data-skool="portada" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener">🐝 Más juegos como este<small>Gratis, en la comunidad de logopedas de ColmenIA</small></a>
+      <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA. Para cambiar la regla, toca ⚙️.</p>
+      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda.</p>
+    </div></div>
+
+    <div class="velo" id="vPausa"><div class="tarjeta"><h1>⏸ Pausa</h1><p id="pausaRegla"></p><button class="btn" id="bSigue" type="button">▶ Seguir</button><button class="btn s" id="bAcabar" type="button">Terminar la tanda</button></div></div>
+
+    <div class="velo" id="vFin"><div class="tarjeta">
+      <h1 id="finTit">¡Tanda terminada!</h1>
+      <div class="estrellas" id="finEstrellas"></div>
+      <div class="res" id="finRes"></div>
+      <div id="finFallos"></div>
+      <p class="nota" id="finEnvio"></p>
+      <button class="btn" id="bOtra" type="button">▶ Otra tanda</button>
+      <a class="cta" data-skool="final" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener">🐝 ¿Quieres más juegos como este?<small>Están en la comunidad de logopedas de ColmenIA</small></a>
+    </div></div>
+
+    <div class="velo" id="vAjustes"><div class="tarjeta" style="text-align:left">
+      <h1 style="text-align:center">⚙️ Ajustes (logopeda)</h1>
+      <div class="campo"><label for="aRegla">Regla</label><select id="aRegla"><option value="empieza">Come las que EMPIEZAN por…</option><option value="contiene">Come las que CONTIENEN…</option><option value="termina">Come las que TERMINAN en…</option><option value="silabas">Come las de N sílabas</option><option value="todas">Todas (sin intrusas)</option></select></div>
+      <div class="campo" id="cLetra"><label>Letra o grupo</label><div class="letras" id="aLetras"></div></div>
+      <div class="campo" id="cSil"><label for="aSil">Sílabas</label><select id="aSil"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o más</option></select></div>
+      <div class="campo"><label for="aMeta">Palabras por tanda</label><select id="aMeta"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
+      <div class="campo"><label for="aNivel">Dificultad</label><select id="aNivel"><option value="auto">Se adapta sola</option><option value="1">Nivel 1 (fijo)</option><option value="2">Nivel 2 (fijo)</option><option value="3">Nivel 3 (fijo)</option><option value="4">Nivel 4 (fijo)</option></select></div>
+      <div style="text-align:center"><button class="btn" id="bAplica" type="button">Aplicar</button><button class="btn s" id="bCierra" type="button">Cerrar</button></div>
+    </div></div>
+  </div>
+</div>
+
+<script>
+/* banco propio de Fönia: [palabra, sílabas] */
+var BANCO_JSON = [["ala", 2], ["amarillo", 4], ["araña", 3], ["arroz", 2], ["azul", 2], ["azúcar", 3], ["año", 2], ["ballena", 3], ["balón", 2], ["barro", 2], ["bicicleta", 4], ["boca", 2], ["bota", 2], ["botella", 3], ["botón", 2], ["burro", 2], ["cabaña", 3], ["cabeza", 3], ["calcetín", 3], ["calculadora", 5], ["calendario", 4], ["calle", 2], ["cama", 2], ["camisa", 3], ["caramelo", 4], ["carro", 2], ["casa", 2], ["castillo", 3], ["cazo", 2], ["chaqueta", 3], ["charco", 2], ["chicle", 2], ["chimenea", 4], ["chocolate", 4], ["chupete", 3], ["cielo", 2], ["coche", 2], ["cocina", 3], ["cocodrilo", 4], ["col", 1], ["cometa", 3], ["conejo", 3], ["correr", 2], ["cruz", 1], ["cuchara", 3], ["cuchillo", 3], ["cuna", 2], ["dado", 2], ["dama", 2], ["dedo", 2], ["diente", 2], ["dinero", 3], ["dinosaurio", 4], ["disco", 2], ["doce", 2], ["dos", 1], ["dulce", 2], ["elefante", 4], ["escuela", 3], ["espejo", 3], ["falda", 2], ["familia", 3], ["faro", 2], ["flecha", 2], ["flor", 1], ["flores", 2], ["foca", 2], ["foto", 2], ["fresa", 2], ["fruta", 2], ["fuego", 2], ["fuente", 2], ["gallina", 3], ["gato", 2], ["globo", 2], ["goma", 2], ["guitarra", 3], ["gusano", 3], ["helado", 3], ["helicóptero", 5], ["hermano", 3], ["hipopótamo", 5], ["hoja", 2], ["isla", 2], ["jabón", 2], ["jardín", 2], ["jarra", 2], ["jaula", 2], ["jirafa", 3], ["joya", 2], ["juego", 2], ["jugo", 2], ["lana", 2], ["lazo", 2], ["leche", 2], ["lechuga", 3], ["lento", 2], ["ley", 1], ["león", 2], ["libro", 2], ["limón", 2], ["llave", 2], ["lluvia", 2], ["lobo", 2], ["luna", 2], ["lupa", 2], ["luz", 1], ["lámpara", 3], ["lápiz", 2], ["manzana", 3], ["mapa", 2], ["mar", 1], ["mariposa", 4], ["melón", 2], ["mermelada", 4], ["mes", 1], ["mesa", 2], ["miel", 1], ["mochila", 3], ["moneda", 3], ["mono", 2], ["montaña", 3], ["moto", 2], ["muñeca", 3], ["naranja", 3], ["nariz", 2], ["negro", 2], ["nene", 2], ["nido", 2], ["nieve", 2], ["noche", 2], ["nombre", 2], ["nota", 2], ["nube", 2], ["nuez", 1], ["ojo", 2], ["ordenador", 4], ["oso", 2], ["paloma", 3], ["pan", 1], ["pantalón", 3], ["papel", 2], ["pared", 2], ["pastel", 2], ["patata", 3], ["pato", 2], ["payaso", 3], ["pañuelo", 3], ["peine", 2], ["pelo", 2], ["pelota", 3], ["pepino", 3], ["perro", 2], ["pez", 1], ["pie", 1], ["pila", 2], ["pino", 2], ["pizarra", 3], ["piña", 2], ["plato", 2], ["plaza", 2], ["plátano", 3], ["pollo", 2], ["puente", 2], ["puerta", 2], ["pájaro", 3], ["queso", 2], ["quince", 2], ["radio", 2], ["rama", 2], ["rana", 2], ["ratón", 2], ["red", 1], ["refrigerador", 5], ["regla", 2], ["reloj", 2], ["rey", 1], ["rizo", 2], ["roca", 2], ["rojo", 2], ["ropa", 2], ["rosa", 2], ["rueda", 2], ["ruido", 2], ["río", 2], ["sal", 1], ["salón", 2], ["sandía", 3], ["sapo", 2], ["seis", 1], ["semana", 3], ["semáforo", 4], ["serpiente", 3], ["silla", 2], ["sillón", 2], ["sirena", 3], ["sol", 1], ["sombrero", 3], ["sonrisa", 3], ["sopa", 2], ["sueño", 2], ["sábana", 3], ["tapa", 2], ["taxi", 2], ["taza", 2], ["televisión", 4], ["teléfono", 4], ["tierra", 2], ["tigre", 2], ["tijera", 3], ["tiza", 2], ["toalla", 3], ["tobogán", 3], ["tomate", 3], ["torre", 2], ["tortuga", 3], ["tren", 1], ["tres", 1], ["trueno", 2], ["túnel", 2], ["uno", 2], ["uva", 2], ["uña", 2], ["vaca", 2], ["vaso", 2], ["vecino", 3], ["vela", 2], ["ventana", 3], ["verde", 2], ["vestido", 3], ["viento", 2], ["violín", 2], ["volcán", 2], ["voz", 1], ["yema", 2], ["yoyó", 2], ["zanahoria", 4], ["zapato", 3], ["zorro", 2], ["zumo", 2], ["árbol", 2]];
+</script>
+<script src="snake-voz/indice.js"></script>
+<script>
+(function () {
+'use strict';
+/* ====================== utilidades ====================== */
+var $ = function (id) { return document.getElementById(id); };
+var QS = (function () { try { return new URLSearchParams(location.search); } catch (e) { return { get: function () { return null; } }; } })();
+function nEntre(v, a, b, d) { var n = parseInt(v, 10); return (n >= a && n <= b) ? n : d; }
+function norm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+function coma(n) { return String(n).replace('.', ','); }
+function azar(n) { return Math.floor(Math.random() * n); }
+function elige(a) { return a[azar(a.length)]; }
+function baraja(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = azar(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+var REDUCE = false; try { REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { }
+var BANCO = BANCO_JSON.map(function (p) { return { w: p[0], n: p[1], k: norm(p[0]) }; });
+
+/* ====================== opciones (la logopeda las fija por enlace) ====================== */
+var CASO = ''; /* versión pública: sin paciente, no se envía nada a ningún sitio */
+var TERAPEUTA = (function () { var v = (QS.get('t') || '').trim(); return /^[A-Za-zÀ-ÿ .'-]{2,40}$/.test(v) ? v : ''; })();
+var FIJADO = ['empieza', 'contiene', 'termina', 'silabas', 'todas'].indexOf(QS.get('filtro')) >= 0;
+var OPC = {
+  regla: FIJADO ? QS.get('filtro') : 'empieza',
+  letra: (QS.get('letra') || 'r').toLowerCase().replace(/[^a-zñ]/g, '').slice(0, 2) || 'r',
+  silabas: nEntre(QS.get('silabas'), 1, 4, 2),
+  meta: nEntre(QS.get('meta'), 3, 30, 10),
+  nivel: QS.get('nivel') ? nEntre(QS.get('nivel'), 1, 4, 1) : 0,         /* 0 = se adapta sola */
+  distractores: QS.get('distractores') === null ? null : nEntre(QS.get('distractores'), 0, 5, 1),
+  velocidad: QS.get('velocidad')
+};
+var KOPC = 'fonia-snake-opc';
+if (!FIJADO) { try { var g = JSON.parse(localStorage.getItem(KOPC) || 'null'); if (g) { OPC.regla = g.regla || OPC.regla; OPC.letra = g.letra || OPC.letra; OPC.silabas = g.silabas || OPC.silabas; OPC.meta = g.meta || OPC.meta; OPC.nivel = g.nivel === undefined ? OPC.nivel : g.nivel; } } catch (e) { } }
+if (FIJADO) document.body.classList.add('fijado');
+
+/* ====================== la regla ====================== */
+function cumple(p) {
+  var l = norm(OPC.letra), k = p.k;
+  switch (OPC.regla) {
+    case 'empieza': return k.indexOf(l) === 0;
+    case 'contiene': return k.indexOf(l) >= 0;
+    case 'termina': return k.length >= l.length && k.lastIndexOf(l) === k.length - l.length;
+    case 'silabas': return OPC.silabas >= 4 ? p.n >= 4 : p.n === OPC.silabas;
+    default: return true;
+  }
+}
+function reglaHtml() {
+  var L = OPC.letra.toUpperCase(), r = OPC.regla;
+  if (r === 'empieza') return 'las que EMPIEZAN por <b>' + L + '</b>';
+  if (r === 'contiene') return 'las que CONTIENEN <b>' + L + '</b>';
+  if (r === 'termina') return 'las que TERMINAN en <b>' + L + '</b>';
+  if (r === 'silabas') return OPC.silabas >= 4 ? 'las de <b>4+</b> sílabas' : 'las de <b>' + OPC.silabas + '</b> sílaba' + (OPC.silabas === 1 ? '' : 's');
+  return 'todas las palabras';
+}
+function reglaTexto() { return reglaHtml().replace(/<[^>]+>/g, ''); }
+function porQueNo(p) {
+  var L = OPC.letra.toUpperCase(), r = OPC.regla;
+  if (r === 'empieza') return 'no empieza por ' + L;
+  if (r === 'contiene') return 'no tiene ' + L;
+  if (r === 'termina') return 'no termina en ' + L;
+  if (r === 'silabas') return 'tiene ' + p.n + ' sílaba' + (p.n === 1 ? '' : 's') + ', no ' + (OPC.silabas >= 4 ? '4 o más' : OPC.silabas);
+  return '';
+}
+function porQueSi(p) {
+  var L = OPC.letra.toUpperCase(), r = OPC.regla;
+  if (r === 'empieza') return 'empieza por ' + L;
+  if (r === 'contiene') return 'tiene ' + L;
+  if (r === 'termina') return 'termina en ' + L;
+  if (r === 'silabas') return p.n + ' sílaba' + (p.n === 1 ? '' : 's');
+  return '';
+}
+var CONF = [['b', 'd'], ['p', 'q'], ['b', 'p'], ['d', 'p'], ['m', 'n'], ['n', 'u'], ['s', 'z'], ['c', 'g'], ['f', 'v'], ['a', 'e'], ['l', 'i'], ['t', 'd'], ['b', 'v'], ['r', 'l']];
+function confusion(p) { /* ¿la letra pedida se parece a la letra que sí tiene la palabra? */
+  var l = norm(OPC.letra), x = null;
+  if (OPC.regla === 'empieza') x = p.k.charAt(0); else if (OPC.regla === 'termina') x = p.k.charAt(p.k.length - 1); else return '';
+  for (var i = 0; i < CONF.length; i++) { var c = CONF[i]; if ((c[0] === l && c[1] === x) || (c[1] === l && c[0] === x)) return l + '/' + x; }
+  return '';
+}
+
+/* ====================== sonido ====================== */
+var AC = window.AudioContext || window.webkitAudioContext, actx = null, sonido = true;
+function audioListo() { if (!AC) return; try { if (!actx) actx = new AC(); if (actx.state === 'suspended' && actx.resume) actx.resume(); } catch (e) { actx = null; } }
+function nota(f, t0, dur, tipo, vol) {
+  if (!actx || !sonido) return;
+  try { var o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + t0; o.type = tipo || 'sine'; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.18, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + dur + 0.05); } catch (e) { }
+}
+function sfxOk() { nota(660, 0, 0.12, 'triangle'); nota(880, 0.08, 0.16, 'triangle'); }
+function sfxMal() { nota(220, 0, 0.18, 'sine', 0.2); nota(165, 0.12, 0.22, 'sine', 0.2); }
+function sfxNivel() { nota(523, 0, 0.12, 'triangle'); nota(659, 0.1, 0.12, 'triangle'); nota(784, 0.2, 0.2, 'triangle'); }
+function sfxFin() { nota(523, 0, 0.14, 'triangle'); nota(659, 0.12, 0.14, 'triangle'); nota(784, 0.24, 0.14, 'triangle'); nota(1047, 0.36, 0.3, 'triangle'); }
+var audioPalabra = null;
+function dicePalabra(w) {
+  if (!sonido || !window.VOZ_SNAKE || !window.VOZ_SNAKE[w]) return;
+  try { if (audioPalabra) audioPalabra.pause(); audioPalabra = new Audio('snake-voz/' + window.VOZ_SNAKE[w] + '.mp3'); var p = audioPalabra.play(); if (p && p.catch) p.catch(function () { }); } catch (e) { }
+}
+
+/* ====================== el tablero ====================== */
+var cv = $('c'), cx = cv.getContext('2d'), DPR = 1, W = 0, H = 0, CELL = 40, COLS = 10, ROWS = 8, OX = 0, OY = 0;
+var COLORES = ['#E4572E', '#2E86AB', '#7B4FB5', '#D98E04', '#1B998B', '#C2185B'];
+function medida() {
+  var r = cv.parentNode.getBoundingClientRect(); DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = Math.max(200, Math.floor(r.width)); H = Math.max(200, Math.floor(r.height));
+  cv.width = Math.floor(W * DPR); cv.height = Math.floor(H * DPR);
+  CELL = Math.max(34, Math.min(58, Math.floor(Math.min(W, H) / 9)));
+  COLS = Math.max(8, Math.floor(W / CELL)); ROWS = Math.max(6, Math.floor(H / CELL));
+  OX = Math.floor((W - COLS * CELL) / 2); OY = Math.floor((H - ROWS * CELL) / 2);
+}
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.arcTo(x + w, y, x + w, y + r, r); c.lineTo(x + w, y + h - r); c.arcTo(x + w, y + h, x + w - r, y + h, r); c.lineTo(x + r, y + h); c.arcTo(x, y + h, x, y + h - r, r); c.lineTo(x, y + r); c.arcTo(x, y, x + r, y, r); c.closePath(); }
+function mod(a, n) { return ((a % n) + n) % n; }
+
+/* ====================== estado de la partida ====================== */
+var NIVELES = [
+  { vel: 3.4, obj: 1, dis: 1 }, { vel: 4.0, obj: 1, dis: 2 }, { vel: 4.6, obj: 2, dis: 3 }, { vel: 5.2, obj: 2, dis: 4 }
+];
+var S = null;   /* partida */
+var jugando = false, pausado = false, ultimo = 0, acum = 0, loopOn = false;
+var parts = [], flotantes = [], sacudida = 0, hora = 0;
+var cola = [], dir = { x: 1, y: 0 };
+
+function nivelAct() { return NIVELES[S.nivel - 1]; }
+function pasoMs() { var v = nivelAct().vel; if (OPC.velocidad === 'lenta') v *= 0.75; else if (OPC.velocidad === 'rapida') v *= 1.3; return 1000 / v; }
+function nDis() { return OPC.regla === 'todas' ? 0 : (OPC.distractores !== null ? OPC.distractores : nivelAct().dis); }
+function nObj() { return nivelAct().obj; }
+
+function nuevaPartida() {
+  var ini = OPC.nivel || 1;
+  S = { nivel: ini, aciertos: 0, comidas: [], errores: [], cuerpos: 0, racha: 0, rachaMax: 0, seguidosMal: 0, nivelMax: ini, inicio: Date.now(), enviada: false, motivo: '', cambiaNivel: [], recientes: [] };
+  var cx0 = Math.floor(COLS / 2), cy0 = Math.floor(ROWS / 2);
+  S.snake = [{ x: cx0, y: cy0 }, { x: cx0 - 1, y: cy0 }, { x: cx0 - 2, y: cy0 }]; S.prev = S.snake.map(function (c) { return { x: c.x, y: c.y }; });
+  S.crece = 0; S.tokens = []; dir = { x: 1, y: 0 }; cola = []; parts = []; flotantes = []; sacudida = 0; acum = 0;
+  rellena(); hud();
+}
+function ocupadas() {
+  var m = {}; S.snake.forEach(function (c) { m[c.x + ',' + c.y] = 1; });
+  S.tokens.forEach(function (t) { t.cells.forEach(function (c) { m[c.x + ',' + c.y] = 1; }); var a = t.cells[0], z = t.cells[t.cells.length - 1]; m[(a.x - 1) + ',' + a.y] = 1; m[(z.x + 1) + ',' + z.y] = 1; });
+  /* casillas por delante de la cabeza: margen para reaccionar */
+  var h = S.snake[0]; for (var k = 1; k <= 3; k++) m[mod(h.x + dir.x * k, COLS) + ',' + mod(h.y + dir.y * k, ROWS)] = 1;
+  return m;
+}
+function medidaPalabra(w) { cx.font = '700 ' + Math.round(CELL * 0.56) + 'px "Atkinson Hyperlegible",system-ui,sans-serif'; return cx.measureText(w).width; }
+function creaToken(p, ok) {
+  var tw = medidaPalabra(p.w), celdas = Math.max(2, Math.ceil((tw + CELL * 0.7) / CELL)), occ = ocupadas(), intentos = 0, x, y, bien;
+  celdas = Math.min(celdas, COLS - 2);
+  do {
+    x = azar(COLS - celdas + 1); y = azar(ROWS); bien = true;
+    for (var i = 0; i < celdas; i++) { if (occ[(x + i) + ',' + y]) { bien = false; break; } }
+    intentos++;
+  } while (!bien && intentos < 300);
+  if (!bien) return null;
+  var cells = []; for (var j = 0; j < celdas; j++) cells.push({ x: x + j, y: y });
+  return { p: p, ok: ok, cells: cells, w: celdas, color: COLORES[azar(COLORES.length)], fase: Math.random() * 6.28, nace: Date.now(), t0: Date.now() };
+}
+function palabraNueva(ok) {
+  var usados = {}; S.tokens.forEach(function (t) { usados[t.p.w] = 1; }); S.recientes.forEach(function (w) { usados[w] = 1; });
+  var pool = BANCO.filter(function (p) { return !usados[p.w] && (cumple(p) === ok); });
+  if (!pool.length) pool = BANCO.filter(function (p) { return cumple(p) === ok && !S.tokens.some(function (t) { return t.p.w === p.w; }); });
+  if (!pool.length) return null;
+  return elige(pool);
+}
+function rellena() {
+  var okN = S.tokens.filter(function (t) { return t.ok; }).length, noN = S.tokens.length - okN, guard = 0;
+  while (okN < nObj() && guard++ < 20) { var p = palabraNueva(true); var t = p && creaToken(p, true); if (t) { S.tokens.push(t); okN++; } else break; }
+  guard = 0;
+  while (noN < nDis() && guard++ < 20) { var q = palabraNueva(false); var u = q && creaToken(q, false); if (u) { S.tokens.push(u); noN++; } else break; }
+}
+
+/* ====================== mover ====================== */
+function paso() {
+  var n = S.snake.length;
+  if (cola.length) { var d = cola.shift(); if (!(d.x === -dir.x && d.y === -dir.y)) dir = d; }
+  S.prev = S.snake.map(function (c) { return { x: c.x, y: c.y }; });
+  var h = S.snake[0], nx = mod(h.x + dir.x, COLS), ny = mod(h.y + dir.y, ROWS);
+  /* se choca con su cuerpo: se acorta, no se muere */
+  for (var i = 1; i < n - 1; i++) {
+    if (S.snake[i].x === nx && S.snake[i].y === ny) {
+      S.cuerpos++; var perdidos = Math.max(0, n - Math.max(3, i)); S.snake.length = Math.max(3, i);
+      aviso('¡Ay! Te has mordido la cola', 'info'); sfxMal(); if (!REDUCE) sacudida = 8; hud(); break;
+    }
+  }
+  S.snake.unshift({ x: nx, y: ny });
+  if (S.crece > 0) S.crece--; else S.snake.pop();
+  /* ¿una palabra? */
+  for (var k = 0; k < S.tokens.length; k++) {
+    var t = S.tokens[k], dentro = false;
+    for (var c = 0; c < t.cells.length; c++) if (t.cells[c].x === nx && t.cells[c].y === ny) { dentro = true; break; }
+    if (dentro) { decide(t, k); break; }
+  }
+}
+function decide(t, idx) {
+  var ms = Date.now() - t.t0;
+  S.tokens.splice(idx, 1);
+  S.recientes.push(t.p.w); if (S.recientes.length > 8) S.recientes.shift();
+  var cen = celdaPx(t.cells[0].x + (t.cells.length - 1) / 2, t.cells[0].y);
+  if (t.ok) {
+    S.aciertos++; S.racha++; S.rachaMax = Math.max(S.rachaMax, S.racha); S.seguidosMal = 0; S.crece += 1;
+    S.comidas.push({ w: t.p.w, ms: ms });
+    sfxOk(); dicePalabra(t.p.w);
+    aviso('✔ ' + t.p.w + ' · ' + porQueSi(t.p), 'ok');
+    estalla(cen.x, cen.y, '#F4B93A', 14); flota(cen.x, cen.y - 10, '+1', '#1E7B4B');
+    if (S.racha > 0 && S.racha % 4 === 0 && !OPC.nivel && S.nivel < 4) { S.nivel++; S.nivelMax = Math.max(S.nivelMax, S.nivel); S.cambiaNivel.push('sube a ' + S.nivel); sfxNivel(); aviso('⭐ ¡Nivel ' + S.nivel + '!', 'info'); }
+  } else {
+    S.racha = 0; S.seguidosMal++;
+    S.errores.push({ w: t.p.w, por: porQueNo(t.p), conf: confusion(t.p), ms: ms });
+    sfxMal(); aviso('✘ ' + t.p.w + ' · ' + porQueNo(t.p), 'mal');
+    estalla(cen.x, cen.y, '#D9483B', 8); if (!REDUCE) sacudida = 10;
+    if (S.snake.length > 3) S.snake.pop();
+    if (S.seguidosMal >= 2 && !OPC.nivel && S.nivel > 1) { S.nivel--; S.cambiaNivel.push('baja a ' + S.nivel); S.seguidosMal = 0; aviso('Vamos más tranquilos: nivel ' + S.nivel, 'info'); }
+  }
+  hud();
+  if (S.aciertos >= OPC.meta) { setTimeout(function () { terminar('meta'); }, 450); jugando = false; return; }
+  rellena();
+}
+
+/* ====================== dibujo ====================== */
+function celdaPx(cx_, cy_) { return { x: OX + (cx_ + 0.5) * CELL, y: OY + (cy_ + 0.5) * CELL }; }
+function fondo() {
+  var g = cx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#CFEBC9'); g.addColorStop(1, '#A9D8A8'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+  for (var y = 0; y < ROWS; y++) for (var x = 0; x < COLS; x++) { if ((x + y) % 2 === 0) { cx.fillStyle = 'rgba(255,255,255,0.22)'; cx.fillRect(OX + x * CELL, OY + y * CELL, CELL, CELL); } }
+  cx.strokeStyle = 'rgba(14,53,36,0.35)'; cx.lineWidth = 3; rr(cx, OX + 1.5, OY + 1.5, COLS * CELL - 3, ROWS * CELL - 3, 14); cx.stroke();
+}
+function posSuave(i, alfa) {
+  var a = S.prev[Math.min(i, S.prev.length - 1)], b = S.snake[i], dx = b.x - a.x, dy = b.y - a.y;
+  if (dx > 1) dx -= COLS; else if (dx < -1) dx += COLS; if (dy > 1) dy -= ROWS; else if (dy < -1) dy += ROWS;
+  return { x: a.x + dx * alfa, y: a.y + dy * alfa };
+}
+function dibujaSerpiente(alfa) {
+  var n = S.snake.length, pts = [], i, p;
+  p = posSuave(0, alfa); pts.push({ x: p.x, y: p.y });
+  for (i = 1; i < n; i++) { /* cada punto relativo al anterior por la imagen más cercana (el tablero da la vuelta) */
+    p = posSuave(i, alfa); var q = pts[i - 1], dx = p.x - q.x, dy = p.y - q.y;
+    if (dx > COLS / 2) dx -= COLS; else if (dx < -COLS / 2) dx += COLS; if (dy > ROWS / 2) dy -= ROWS; else if (dy < -ROWS / 2) dy += ROWS;
+    pts.push({ x: q.x + dx, y: q.y + dy });
+  }
+  var minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9; pts.forEach(function (q) { minx = Math.min(minx, q.x); maxx = Math.max(maxx, q.x); miny = Math.min(miny, q.y); maxy = Math.max(maxy, q.y); });
+  for (var ox = -1; ox <= 1; ox++) for (var oy = -1; oy <= 1; oy++) {
+    var sx = ox * COLS, sy = oy * ROWS;
+    if (maxx + sx < -1 || minx + sx > COLS + 1 || maxy + sy < -1 || miny + sy > ROWS + 1) continue;
+    pintaCuerpo(pts, sx, sy);
+  }
+}
+function pintaCuerpo(pts, sx, sy) {
+  var n = pts.length, i, a, b, w;
+  function P(q) { return celdaPx(q.x + sx, q.y + sy); }
+  cx.lineCap = 'round'; cx.lineJoin = 'round';
+  /* sombra */
+  for (i = n - 1; i > 0; i--) { a = P(pts[i]); b = P(pts[i - 1]); w = CELL * (0.74 - 0.22 * (i / n)); cx.strokeStyle = 'rgba(14,53,36,0.22)'; cx.lineWidth = w; cx.beginPath(); cx.moveTo(a.x + 3, a.y + 6); cx.lineTo(b.x + 3, b.y + 6); cx.stroke(); }
+  /* contorno y relleno por tramos (más fino hacia la cola) */
+  for (i = n - 1; i > 0; i--) { a = P(pts[i]); b = P(pts[i - 1]); w = CELL * (0.80 - 0.26 * (i / n)); cx.strokeStyle = '#14513A'; cx.lineWidth = w + 5; cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke(); }
+  for (i = n - 1; i > 0; i--) { a = P(pts[i]); b = P(pts[i - 1]); w = CELL * (0.80 - 0.26 * (i / n)); cx.strokeStyle = (i % 2 === 0) ? '#3DBE7A' : '#33AE6C'; cx.lineWidth = w; cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke(); }
+  for (i = n - 1; i > 0; i--) { a = P(pts[i]); b = P(pts[i - 1]); w = CELL * (0.80 - 0.26 * (i / n)); cx.strokeStyle = 'rgba(255,255,255,0.28)'; cx.lineWidth = w * 0.28; cx.beginPath(); cx.moveTo(a.x - w * 0.12, a.y - w * 0.12); cx.lineTo(b.x - w * 0.12, b.y - w * 0.12); cx.stroke(); }
+  /* cabeza */
+  var h = P(pts[0]), ang = Math.atan2(dir.y, dir.x), r = CELL * 0.46;
+  cx.save(); cx.translate(h.x, h.y); cx.rotate(ang);
+  cx.fillStyle = '#14513A'; cx.beginPath(); cx.ellipse(CELL * 0.06, 0, r + 3, r * 0.92 + 3, 0, 0, 6.2832); cx.fill();
+  var gr = cx.createRadialGradient(-r * 0.2, -r * 0.3, r * 0.1, 0, 0, r * 1.2); gr.addColorStop(0, '#6FE0A0'); gr.addColorStop(1, '#2FA866');
+  cx.fillStyle = gr; cx.beginPath(); cx.ellipse(CELL * 0.06, 0, r, r * 0.9, 0, 0, 6.2832); cx.fill();
+  /* lengua */
+  var lengua = Math.sin(hora / 380) > 0.86 && !REDUCE;
+  if (lengua) { cx.strokeStyle = '#D9483B'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(r * 0.9, 0); cx.lineTo(r * 1.5, 0); cx.moveTo(r * 1.5, 0); cx.lineTo(r * 1.8, -5); cx.moveTo(r * 1.5, 0); cx.lineTo(r * 1.8, 5); cx.stroke(); }
+  /* ojos */
+  var parp = (Math.floor(hora / 2600) % 3 === 0 && (hora % 2600) < 140) && !REDUCE;
+  [-1, 1].forEach(function (s) {
+    var ex = r * 0.28, ey = s * r * 0.5;
+    cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(ex, ey, r * 0.32, 0, 6.2832); cx.fill();
+    if (parp) { cx.strokeStyle = '#14513A'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(ex - r * 0.25, ey); cx.lineTo(ex + r * 0.25, ey); cx.stroke(); }
+    else { cx.fillStyle = '#10231A'; cx.beginPath(); cx.arc(ex + r * 0.1, ey, r * 0.17, 0, 6.2832); cx.fill(); cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(ex + r * 0.15, ey - r * 0.06, r * 0.06, 0, 6.2832); cx.fill(); }
+  });
+  cx.restore();
+}
+function dibujaToken(t) {
+  var x0 = OX + t.cells[0].x * CELL, y0 = OY + t.cells[0].y * CELL, w = t.cells.length * CELL, h = CELL;
+  var bob = REDUCE ? 0 : Math.sin(hora / 520 + t.fase) * 2.5, edad = Math.min(1, (Date.now() - t.nace) / 260), esc = REDUCE ? 1 : (0.6 + 0.4 * (1 - Math.pow(1 - edad, 3)));
+  cx.save(); cx.translate(x0 + w / 2, y0 + h / 2 + bob); cx.scale(esc, esc); cx.translate(-w / 2, -h / 2);
+  var pad = h * 0.06;
+  cx.fillStyle = 'rgba(14,53,36,0.25)'; rr(cx, pad + 1, pad + 5, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill();
+  cx.fillStyle = '#FFFFFF'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill();
+  cx.strokeStyle = t.color; cx.lineWidth = Math.max(3, CELL * 0.08); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke();
+  cx.fillStyle = '#10231A'; cx.font = '700 ' + Math.round(CELL * 0.56) + 'px "Atkinson Hyperlegible",system-ui,sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  cx.fillText(t.p.w, w / 2, h / 2 + 1);
+  cx.restore();
+}
+function dibuja(alfa) {
+  cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  var sx = 0, sy = 0; if (sacudida > 0) { sx = (Math.random() - 0.5) * sacudida; sy = (Math.random() - 0.5) * sacudida; sacudida = Math.max(0, sacudida - 0.8); }
+  cx.save(); cx.translate(sx, sy); fondo();
+  if (S) { S.tokens.forEach(dibujaToken); dibujaSerpiente(alfa); }
+  parts.forEach(function (p) { cx.globalAlpha = Math.max(0, p.v / p.v0); cx.fillStyle = p.c; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.2832); cx.fill(); });
+  cx.globalAlpha = 1;
+  flotantes.forEach(function (f) { cx.globalAlpha = Math.max(0, f.v / 900); cx.fillStyle = f.c; cx.font = '700 ' + Math.round(CELL * 0.6) + 'px "Jost",system-ui,sans-serif'; cx.textAlign = 'center'; cx.fillText(f.t, f.x, f.y); });
+  cx.globalAlpha = 1; cx.restore();
+}
+function estalla(x, y, c, n) { if (REDUCE) return; for (var i = 0; i < n; i++) { var a = Math.random() * 6.28, v = 1 + Math.random() * 3; parts.push({ x: x, y: y, dx: Math.cos(a) * v, dy: Math.sin(a) * v - 1, r: 3 + Math.random() * 3, c: i % 3 ? c : '#fff', v: 500, v0: 500 }); } }
+function flota(x, y, t, c) { if (REDUCE) return; flotantes.push({ x: x, y: y, t: t, c: c, v: 900 }); }
+function avanzaEfectos(dt) {
+  parts.forEach(function (p) { p.x += p.dx; p.y += p.dy; p.dy += 0.12; p.v -= dt; }); parts = parts.filter(function (p) { return p.v > 0; });
+  flotantes.forEach(function (f) { f.y -= 0.6; f.v -= dt; }); flotantes = flotantes.filter(function (f) { return f.v > 0; });
+}
+
+/* ====================== bucle (30 FPS, se detiene si la pestaña se oculta) ====================== */
+function bucle(ts) {
+  if (document.hidden) { loopOn = false; return; }
+  requestAnimationFrame(bucle);
+  if (!ts) ts = Date.now();
+  var dt = ts - ultimo; if (dt < 33) return; if (dt > 250) dt = 33; ultimo = ts; hora = ts;
+  var alfa = 1;
+  if (S && jugando && !pausado) { acum += dt; var pm = pasoMs(); while (acum >= pm && jugando) { acum -= pm; paso(); } alfa = jugando ? Math.min(1, acum / pm) : 1; }
+  else if (S) alfa = 1;
+  avanzaEfectos(dt); dibuja(alfa);
+}
+function arrancaBucle() { if (loopOn) return; loopOn = true; ultimo = 0; requestAnimationFrame(bucle); }
+
+/* ====================== interfaz ====================== */
+var avisoT = null;
+function aviso(t, tipo) { var a = $('aviso'); a.textContent = t; a.className = 'on ' + (tipo || 'info'); clearTimeout(avisoT); avisoT = setTimeout(function () { a.className = ''; a.textContent = S && jugando ? 'Lee bien antes de comer' : ''; }, 2400); }
+function hud() {
+  $('chipRegla').innerHTML = reglaHtml();
+  $('hPunt').textContent = (S ? S.aciertos : 0) + '/' + OPC.meta;
+  $('hRacha').textContent = S ? S.racha : 0;
+}
+function velo(id, on) { $(id).className = 'velo' + (on ? ' on' : ''); }
+function muestraInicio() {
+  $('inicioRegla').innerHTML = OPC.regla === 'todas' ? 'Come todas las palabras' : 'Come solo ' + reglaHtml();
+  velo('vInicio', true);
+}
+function juega() {
+  try { audioListo(); } catch (e) { }
+  try {
+    if (!W || !COLS) medida();
+    velo('vInicio', false); velo('vFin', false); velo('vPausa', false);
+    nuevaPartida(); jugando = true; pausado = false; arrancaBucle(); $('dpad').className = 'on';
+  } catch (e) { muestraError('No he podido empezar: ' + (e && e.message ? e.message : e)); velo('vInicio', true); }
+}
+function muestraError(t) { var a = $('aviso'); if (a) { a.textContent = '⚠ ' + t; a.className = 'on mal'; } }
+window.addEventListener('error', function (ev) { muestraError('Error: ' + (ev && ev.message ? ev.message : 'desconocido')); });
+function pausa(on) {
+  if (!jugando) return; pausado = on;
+  $('pausaRegla').innerHTML = (OPC.regla === 'todas' ? 'Come todas las palabras' : 'Recuerda: come solo ' + reglaHtml());
+  velo('vPausa', on);
+}
+function estrellasDe(prec) { return prec >= 0.9 ? 3 : (prec >= 0.7 ? 2 : 1); }
+function terminar(motivo) {
+  if (!S || S.finalizada) return; S.finalizada = true; S.motivo = motivo; jugando = false; sfxFin();
+  var total = S.comidas.length + S.errores.length, prec = total ? S.comidas.length / total : 1, est = estrellasDe(prec);
+  var seg = Math.max(1, Math.round((Date.now() - S.inicio) / 1000));
+  $('finTit').textContent = motivo === 'meta' ? '¡Tanda terminada!' : 'Tanda terminada';
+  $('finEstrellas').innerHTML = '★'.repeat(est) + '<i>' + '★'.repeat(3 - est) + '</i>';
+  $('finRes').innerHTML = '<div><b>' + S.comidas.length + '</b>bien</div><div><b>' + S.errores.length + '</b>intrusas</div><div><b>' + Math.round(prec * 100) + ' %</b>acierto</div><div><b>' + S.rachaMax + '</b>mejor racha</div><div><b>' + Math.floor(seg / 60) + ':' + ('0' + (seg % 60)).slice(-2) + '</b>tiempo</div>';
+  var ff = '';
+  if (S.errores.length) { ff = '<p style="margin:10px 0 0;font-weight:700">Para recordar:</p><ul class="fallos">' + S.errores.slice(0, 5).map(function (e) { return '<li><b>' + e.w + '</b>: ' + e.por + '</li>'; }).join('') + '</ul>'; }
+  $('finFallos').innerHTML = ff;
+  $('finEnvio').textContent = 'Nada sale de este aparato: aquí no se guarda ni se envía ningún dato.';
+  velo('vFin', true); $('dpad').className = '';
+  envia(false);
+}
+
+/* ====================== entrada ====================== */
+function gira(x, y) { if (!jugando || pausado) return; var ult = cola.length ? cola[cola.length - 1] : dir; if (ult.x === x && ult.y === y) return; if (ult.x === -x && ult.y === -y) return; if (cola.length < 2) cola.push({ x: x, y: y }); }
+document.addEventListener('keydown', function (e) {
+  var k = e.key; audioListo();
+  if (k === 'ArrowUp' || k === 'w' || k === 'W') { gira(0, -1); e.preventDefault(); }
+  else if (k === 'ArrowDown' || k === 's' || k === 'S') { gira(0, 1); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'a' || k === 'A') { gira(-1, 0); e.preventDefault(); }
+  else if (k === 'ArrowRight' || k === 'd' || k === 'D') { gira(1, 0); e.preventDefault(); }
+  else if (k === 'p' || k === 'P' || k === 'Escape') { pausa(!pausado); }
+  else if (k === ' ' || k === 'Enter') { if ($('vInicio').className.indexOf('on') >= 0) juega(); else if ($('vFin').className.indexOf('on') >= 0) juega(); else if (pausado) pausa(false); }
+});
+var tx = 0, ty = 0, tOn = false;
+function ini(x, y) { tx = x; ty = y; tOn = true; audioListo(); }
+function fin(x, y) {
+  if (!tOn) return; tOn = false; var dx = x - tx, dy = y - ty;
+  if (Math.abs(dx) < 22 && Math.abs(dy) < 22) return;
+  if (Math.abs(dx) > Math.abs(dy)) gira(dx > 0 ? 1 : -1, 0); else gira(0, dy > 0 ? 1 : -1);
+}
+function mueve(x, y) { if (!tOn) return; var dx = x - tx, dy = y - ty; if (Math.abs(dx) > 30 || Math.abs(dy) > 30) { fin(x, y); tx = x; ty = y; tOn = true; } }
+cv.addEventListener('touchstart', function (e) { var t = e.changedTouches[0]; ini(t.clientX, t.clientY); e.preventDefault(); }, { passive: false });
+cv.addEventListener('touchmove', function (e) { var t = e.changedTouches[0]; mueve(t.clientX, t.clientY); e.preventDefault(); }, { passive: false });
+cv.addEventListener('touchend', function (e) { var t = e.changedTouches[0]; fin(t.clientX, t.clientY); e.preventDefault(); }, { passive: false });
+cv.addEventListener('mousedown', function (e) { ini(e.clientX, e.clientY); });
+window.addEventListener('mouseup', function (e) { fin(e.clientX, e.clientY); });
+[['u', 0, -1], ['d', 0, 1], ['l', -1, 0], ['r', 1, 0]].forEach(function (b) { var el = document.querySelector('#dpad .' + b[0]); var f = function (e) { audioListo(); gira(b[1], b[2]); e.preventDefault(); }; el.addEventListener('touchstart', f, { passive: false }); el.addEventListener('mousedown', f); });
+var ultToque = 0;
+function dispara(f) { return function (e) { var t = Date.now(); if (e && e.type === 'touchend') { ultToque = t; if (e.preventDefault) e.preventDefault(); } else if (t - ultToque < 600) return; f(); }; }
+['bJugar', 'bOtra'].forEach(function (id) { var b = $(id); b.addEventListener('click', dispara(juega)); b.addEventListener('touchend', dispara(juega)); });
+$('bPausa').onclick = function () { pausa(!pausado); };
+$('bSigue').onclick = function () { pausa(false); };
+$('bAcabar').onclick = function () { velo('vPausa', false); pausado = false; terminar('manual'); };
+$('bSonido').onclick = function () { sonido = !sonido; $('bSonido').textContent = sonido ? '🔊' : '🔇'; audioListo(); };
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden) { if (jugando && !pausado) pausa(true); if (S && !S.enviada && !S.finalizada) envia(true); }
+  else arrancaBucle();
+});
+window.addEventListener('resize', function () { medida(); });
+window.addEventListener('orientationchange', function () { setTimeout(medida, 200); });
+
+/* ---- ajustes de la logopeda ---- */
+var LETRAS = 'a b c d e f g h j l m n ñ p q r rr s t v z ch ll'.split(' ');
+function pintaAjustes() {
+  $('aRegla').value = OPC.regla; $('aSil').value = String(OPC.silabas); $('aMeta').value = String(OPC.meta); $('aNivel').value = OPC.nivel ? String(OPC.nivel) : 'auto';
+  var c = $('aLetras'); c.innerHTML = ''; LETRAS.forEach(function (l) { var b = document.createElement('button'); b.type = 'button'; b.textContent = l; b.className = l === OPC.letra ? 'on' : ''; b.onclick = function () { OPC.letra = l; pintaAjustes(); }; c.appendChild(b); });
+  $('cLetra').style.display = (OPC.regla === 'silabas' || OPC.regla === 'todas') ? 'none' : ''; $('cSil').style.display = OPC.regla === 'silabas' ? '' : 'none';
+}
+$('aRegla').onchange = function () { OPC.regla = $('aRegla').value; pintaAjustes(); };
+$('bAjustes').onclick = function () { if (jugando) pausa(true); pintaAjustes(); velo('vAjustes', true); };
+$('bCierra').onclick = function () { velo('vAjustes', false); };
+$('bAplica').onclick = function () {
+  OPC.regla = $('aRegla').value; OPC.silabas = parseInt($('aSil').value, 10); OPC.meta = parseInt($('aMeta').value, 10); OPC.nivel = $('aNivel').value === 'auto' ? 0 : parseInt($('aNivel').value, 10);
+  try { localStorage.setItem(KOPC, JSON.stringify({ regla: OPC.regla, letra: OPC.letra, silabas: OPC.silabas, meta: OPC.meta, nivel: OPC.nivel })); } catch (e) { }
+  velo('vAjustes', false); velo('vPausa', false); jugando = false; pausado = false; velo('vFin', false); hud(); muestraInicio();
+};
+
+/* ====================== envío al gabinete (mismo circuito que el resto de materiales) ====================== */
+var FC = { panel: '', registro: '', version: '2.0.0', material: 'Snake de palabras', slug: 'snake-de-palabras' };
+var COLA = 'fonia-cola-' + FC.slug;
+function d2(n) { return ('0' + n).slice(-2); }
+function momento() { var d = new Date(); return d2(d.getDate()) + '/' + d2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + d2(d.getHours()) + ':' + d2(d.getMinutes()); }
+function texto(filas) {
+  function fila(p) { return '  ' + p[0] + ' ' + new Array(Math.max(2, 26 - p[0].length) + 1).join('.') + ' ' + p[1]; }
+  return 'GABINETE FÖNIA · REGISTRO DE FAMILIA\n========================================\n' + fila(['Caso', CASO]) + '\n' + fila(['Logopeda', TERAPEUTA || 'sin asignar']) + '\n' + fila(['Material', FC.material]) + '\n' + fila(['Enviado', momento()]) + '\n\nLO QUE HAN HECHO\n' + filas.map(fila).join('\n') + '\n\nSin datos identificativos: este registro se identifica solo por el código de caso. No se envía ninguna grabación: solo texto y números.';
+}
+function leeCola() { try { return JSON.parse(localStorage.getItem(COLA) || '[]'); } catch (e) { return []; } }
+function alPanel(reg) { try { fetch(FC.panel, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ id: reg.id, caso: reg.caso, terapeuta: reg.terapeuta, material: FC.slug, contenido: reg.texto, version: FC.version }) }).catch(function () { }); } catch (e) { } }
+function alRegistro(reg) { return fetch(FC.registro, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: reg.id, caso: reg.caso, terapeuta: reg.terapeuta, material: FC.slug, contenido: reg.texto, version: FC.version }) }).then(function (r) { if (!r.ok) throw new Error('rechazado'); }); }
+function filasPartida(parcial) {
+  var com = S.comidas, err = S.errores, total = com.length + err.length, prec = total ? com.length / total : null;
+  var ms = com.map(function (c) { return c.ms; }).sort(function (a, b) { return a - b; }), med = ms.length ? ms[Math.floor(ms.length / 2)] : null;
+  var seg = Math.max(1, Math.round((Date.now() - S.inicio) / 1000));
+  var confs = {}; err.forEach(function (e) { if (e.conf) confs[e.conf] = (confs[e.conf] || 0) + 1; });
+  var como = prec === null || total < 4 ? 'sin dato' : (prec >= 0.85 ? 'bien' : (prec >= 0.6 ? 'regular' : 'le cuesta'));
+  var palErr = err.slice(0, 5).map(function (e) { return '«' + e.w + '» (' + e.por + ')'; }).join(' · ');
+  return [
+    ['Regla', reglaTexto()], ['Tanda', parcial ? 'interrumpida (se salió o se ocultó la pantalla)' : (S.motivo === 'meta' ? 'completa (' + OPC.meta + ' palabras)' : 'terminada antes de la meta')],
+    ['Palabras comidas', com.length + (com.length ? ' · ' + com.slice(0, 8).map(function (c) { return c.w; }).join(', ') : '')],
+    ['Intrusas tocadas', err.length + (err.length ? ' · ' + palErr : '')],
+    ['Acierto al elegir', prec === null ? 'sin datos' : Math.round(prec * 100) + ' % (' + com.length + ' bien, ' + err.length + ' intrusas)'],
+    ['Letras que confunde', Object.keys(confs).length ? Object.keys(confs).map(function (k) { return k + ' ×' + confs[k]; }).join(', ') : 'ninguna detectada'],
+    ['Tiempo por palabra', med === null ? 'sin datos' : coma((med / 1000).toFixed(1)) + ' s (mediana, desde que sale hasta que la come)'],
+    ['Nivel', 'empezó en ' + (OPC.nivel || 1) + ' · llegó a ' + S.nivelMax + (OPC.nivel ? ' (fijado por la logopeda)' : ' (se adapta sola)') + (S.cambiaNivel.length ? ' · ' + S.cambiaNivel.join(', ') : '')],
+    ['Mejor racha', String(S.rachaMax)], ['Se mordió la cola', String(S.cuerpos)], ['Duración', Math.floor(seg / 60) + ' min ' + (seg % 60) + ' s'],
+    ['Medido por', 'el juego (toques y movimientos; no hay voz)'],
+    ['Fönia · Cómo va', como],
+    ['Fönia · Qué le cuesta', err.length ? 'se lanza a intrusas: ' + err.slice(0, 4).map(function (e) { return e.w; }).join(', ') + (Object.keys(confs).length ? ' · confunde ' + Object.keys(confs).join(', ') : '') : '—'],
+    ['Fönia · Qué toca ahora', como === 'bien' ? (S.nivelMax >= 4 ? 'cambiar la regla o la letra' : 'otra tanda: el nivel sube solo') : (como === 'sin dato' ? 'hacer una tanda completa' : 'repetir esta regla con calma (nivel 1-2)')]
+  ];
+}
+function envia(parcial) {
+  if (!S || S.enviada) return Promise.resolve('x'); if ((S.comidas.length + S.errores.length) < 1) return Promise.resolve('x'); if (parcial && (S.comidas.length + S.errores.length) < 3) return Promise.resolve('x');
+  S.enviada = true;
+  if (!CASO) return Promise.resolve('sin-caso');
+  var reg = { id: 'c' + CASO + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), caso: CASO, terapeuta: TERAPEUTA, texto: texto(filasPartida(parcial)) };
+  alPanel(reg);
+  return alRegistro(reg).then(function () { return 'ok'; }).catch(function () { try { var c = leeCola(); c.push(reg); localStorage.setItem(COLA, JSON.stringify(c.slice(-10))); } catch (e) { } return 'cola'; });
+}
+if (false) (function () { leeCola().forEach(function (reg) { alRegistro(reg).then(function () { try { localStorage.setItem(COLA, JSON.stringify(leeCola().filter(function (x) { return x.id !== reg.id; }))); } catch (e) { } }).catch(function () { }); }); })();
+
+/* ====================== arranque ====================== */
+function arranque() { medida(); hud(); muestraInicio(); arrancaBucle(); dibuja(1); }
+arranque();   /* sin esperar a las fuentes: si tardan o no llegan, el juego arranca igual */
+if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function () { medida(); }, function () { }); }
+window.__snake = { OPC: OPC, cumple: cumple, BANCO: BANCO, estado: function () { return S; }, paso: function () { if (S && jugando) paso(); }, juega: juega, gira: gira, pausa: pausa, terminar: terminar, tokens: function () { return S ? S.tokens : []; }, dims: function () { return { COLS: COLS, ROWS: ROWS, CELL: CELL }; } };
+}());
+</script>
+<script>
+(function () {
+  function suma(k) { try { if (window.fetch) fetch('https://abacus.jasoncameron.dev/hit/foniafonia-juegos/' + k, { keepalive: true }).catch(function () {}); } catch (e) {} }
+  suma('snake_aperturas');
+  var b = document.querySelectorAll('a[data-skool]');
+  for (var i = 0; i < b.length; i++) b[i].addEventListener('click', (function (d) { return function () { suma('snake_skool_' + d); }; })(b[i].getAttribute('data-skool')));
+})();
+</script>
+</body>
+</html>
