@@ -36,7 +36,8 @@
 
 <h2>¿Les acerca a la comunidad?</h2>
 <div class="cajas">
-  <div class="caja gorda"><b id="n_skool">…</b><span>toques a «ir a la comunidad» (en total)</span></div>
+  <div class="caja gorda"><b id="n_skool_personas">…</b><span>aparatos distintos que han ido a Skool</span></div>
+  <div class="caja"><b id="n_skool">…</b><span>toques al botón, en total</span></div>
   <div class="caja"><b id="n_skool_portada">…</b><span>desde la portada</span></div>
   <div class="caja"><b id="n_skool_final">…</b><span>al acabar una tanda</span></div>
   <div class="caja"><b id="n_skool_idea">…</b><span>desde «¿echas algo en falta?»</span></div>
@@ -50,15 +51,16 @@
   <div class="caja"><b id="n_informe">…</b><span>informes compartidos</span></div>
 </div>
 
-<h2>Últimos 10 días</h2>
-<p class="nota" id="cargando">Los números van llegando poco a poco (unos 15 segundos).</p>
-<table><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th></tr></thead><tbody id="dias"></tbody></table>
+<h2>Últimos 7 días</h2>
+<p class="nota" id="cargando">Los números van llegando poco a poco (unos 20 segundos).</p>
+<table><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th><th>A Skool</th></tr></thead><tbody id="dias"></tbody></table>
 
 <p style="margin-top:18px"><button type="button" onclick="location.reload()">↻ Actualizar</button></p>
 
 <h2>Cómo leer esto</h2>
 <p class="nota"><b>Aparatos distintos</b> es lo más parecido a «personas»: cada móvil, tableta u ordenador cuenta una vez. Si alguien lo abre en el móvil y en el ordenador, cuenta dos; si borra los datos del navegador, vuelve a contar.</p>
 <p class="nota">El recuento de aparatos y el de días empezó el <b>13 de octubre de 2026</b>. Las aperturas de antes (16, casi todas de pruebas) están en el total de aperturas pero no en la tabla.</p>
+<p class="nota"><b>Lo que esta página no puede saber:</b> cuántos de los que tocan el botón se apuntan de verdad a la comunidad. Eso solo lo ve Skool, en su propio panel de miembros. Aquí se cuenta hasta el momento en que salen hacia allí.</p>
 <p class="nota">No se guarda nada de nadie: solo estas sumas. Sin nombres, sin cuentas y sin cookies.</p>
 <p class="nota"><b>Para que tu aparato no cuente:</b> abre una vez <a href="./?yo=1">el juego con ?yo=1</a> en cada aparato tuyo. Para que vuelva a contar, <a href="./?yo=0">ábrelo con ?yo=0</a>.</p>
 
@@ -78,11 +80,11 @@
       return r.json().then(function (j) { return j && j.value ? j.value : 0; });
     }).catch(function () { return null; });
   }
-  function lee(k) { var p = cola.then(function () { return pide(k, 0); }); cola = p.then(function () { return pausa(380); }); return p; }
+  function lee(k) { var p = cola.then(function () { return pide(k, 0); }); cola = p.then(function () { return pausa(450); }); return p; }
   function pon(id, v) { document.getElementById(id).textContent = v === null ? '—' : v; }
   var d0 = new Date(); document.getElementById('hora').textContent = 'Mirado el ' + d0.toLocaleDateString('es-ES') + ' a las ' + d0.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + '.';
   [['n_personas', 'snake_personas'], ['n_aperturas', 'snake_aperturas'], ['n_partidas', 'snake_partidas'], ['n_tandas', 'snake_tandas_terminadas'],
-   ['n_skool_portada', 'snake_skool_portada'], ['n_skool_final', 'snake_skool_final'],
+   ['n_skool_personas', 'snake_skool_personas'], ['n_skool_portada', 'snake_skool_portada'], ['n_skool_final', 'snake_skool_final'],
    ['n_preparada', 'snake_partida_preparada'], ['n_enlace', 'snake_enlace_familia'], ['n_familia', 'snake_aperturas_enlace_familia'], ['n_informe', 'snake_informe_compartido']
   ].forEach(function (p) { lee(p[1]).then(function (v) { pon(p[0], v); }); });
   Promise.all(['snake_skool_portada', 'snake_skool_final', 'snake_skool_idea_portada', 'snake_skool_idea_final'].map(lee)).then(function (v) {
@@ -90,9 +92,9 @@
     pon('n_skool', n(v[0]) + n(v[1]) + n(v[2]) + n(v[3])); pon('n_skool_idea', n(v[2]) + n(v[3]));
   });
   var dias = [], hoy = new Date();
-  for (var i = 0; i < 10; i++) { var d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i); dias.push(d); }
+  for (var i = 0; i < 7; i++) { var d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i); dias.push(d); }
   function clave(d) { return d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2); }
-  Promise.all(dias.map(function (d) { var k = clave(d); return Promise.all([lee('snake_personas_' + k), lee('snake_aperturas_' + k), lee('snake_partidas_' + k)]); })).then(function (filas) {
+  Promise.all(dias.map(function (d) { var k = clave(d); return Promise.all([lee('snake_personas_' + k), lee('snake_aperturas_' + k), lee('snake_partidas_' + k), lee('snake_skool_dia_' + k)]); })).then(function (filas) {
     var tope = 1; filas.forEach(function (f) { if (f[0] > tope) tope = f[0]; });
     var tb = document.getElementById('dias'); tb.innerHTML = '';
     filas.forEach(function (f, i) {
@@ -101,7 +103,8 @@
       var c1 = document.createElement('td'); var b = document.createElement('span'); b.className = 'barra'; b.style.width = Math.round(80 * (f[0] || 0) / tope) + 'px'; if (f[0]) c1.appendChild(b); c1.appendChild(document.createTextNode(f[0] === null ? '—' : f[0]));
       var c2 = document.createElement('td'); c2.textContent = f[1] === null ? '—' : f[1];
       var c3 = document.createElement('td'); c3.textContent = f[2] === null ? '—' : f[2];
-      tr.appendChild(c0); tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tb.appendChild(tr);
+      var c4 = document.createElement('td'); c4.textContent = f[3] === null ? '—' : f[3];
+      tr.appendChild(c0); tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4); tb.appendChild(tr);
     });
     document.getElementById('cargando').style.display = 'none';
   });

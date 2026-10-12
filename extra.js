@@ -33,8 +33,13 @@
     function mira() { var on = cruz.className === 'on'; if (on && !puesta) { suma('snake_partidas'); suma('snake_partidas_' + hoy()); } puesta = on; }
     if (window.MutationObserver) new MutationObserver(mira).observe(cruz, { attributes: true, attributeFilter: ['class'] }); else setInterval(mira, 700);
   })();
+
   var enl = document.querySelectorAll('a[data-skool]');
-  for (var i = 0; i < enl.length; i++) enl[i].addEventListener('click', (function (d) { return function () { suma('snake_skool_' + d); }; })(enl[i].getAttribute('data-skool')));
+  for (var i = 0; i < enl.length; i++) enl[i].addEventListener('click', (function (d) { return function () {
+    suma('snake_skool_' + d); suma('snake_skool_dia_' + hoy());
+    /* además de los toques, cuántos aparatos distintos han ido alguna vez a la comunidad */
+    try { if (!MIO && !localStorage.getItem('snake-fue-a-skool')) { localStorage.setItem('snake-fue-a-skool', hoy()); suma('snake_skool_personas'); } } catch (e) { }
+  }; })(enl[i].getAttribute('data-skool')));
 
   /* ---------- palabras propias ---------- */
   /* Cuenta sílabas en castellano de forma aproximada: cada grupo de vocales es una sílaba,
