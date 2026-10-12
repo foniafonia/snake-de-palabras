@@ -39,3 +39,6 @@
 .btnimg:active .normal{display:none}.btnimg:active .pulsado{display:block}
 .btnimg:focus-visible{outline:4px solid var(--oro);outline-offset:2px;border-radius:40px}
 @media (max-width:640px){.heroe{width:calc(100% + 28px);margin:0 -14px 10px}}
+/* La portada y «Prepara la partida» tapan toda la pantalla: la barra con la regla y los
+   marcadores no pinta nada hasta que se va a jugar (José, 12/10: «lleva a confusión»). */
+#vPortada,#vPrepara{position:fixed;top:0;left:0;right:0;bottom:0;z-index:30;background:var(--noche);padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
