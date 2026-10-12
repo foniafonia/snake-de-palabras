@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Snake de palabras · cuánta gente lo abre</title>
+<style>
+  body{font:17px/1.5 system-ui,-apple-system,sans-serif;max-width:680px;margin:0 auto;padding:22px 16px 60px;background:#F3F5F2;color:#10231A}
+  h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:26px 0 8px}
+  .sub{color:#4d6457;margin:0 0 18px}
+  .cajas{display:flex;flex-wrap:wrap;margin:0 -5px}
+  .caja{flex:1 1 140px;margin:5px;background:#fff;border:1px solid #DCE6DE;border-radius:16px;padding:12px 14px}
+  .caja b{display:block;font-size:34px;line-height:1.1}
+  .caja span{font-size:14px;color:#4d6457}
+  .caja.gorda{background:#0E3524;color:#fff;border-color:#0E3524}.caja.gorda span{color:#B8D9C4}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE6DE;border-radius:12px;overflow:hidden}
+  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid #EEF2EE;font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left}th{font-size:13px;color:#4d6457;font-weight:600}
+  .barra{display:inline-block;height:10px;border-radius:5px;background:#2FA866;vertical-align:middle;margin-right:6px}
+  .nota{font-size:14px;color:#4d6457}
+  button{font:inherit;font-weight:700;padding:10px 16px;border-radius:12px;border:0;background:#2FA866;color:#fff;cursor:pointer}
+  a{color:#1E7B4B}
+</style>
+</head>
+<body>
+<h1>🐍 Snake de palabras</h1>
+<p class="sub">Cuánta gente lo abre y qué hace. <span id="hora"></span></p>
+
+<div class="cajas">
+  <div class="caja gorda"><b id="n_personas">…</b><span>aparatos distintos que lo han abierto</span></div>
+  <div class="caja"><b id="n_aperturas">…</b><span>veces abierto</span></div>
+  <div class="caja"><b id="n_partidas">…</b><span>partidas empezadas</span></div>
+  <div class="caja"><b id="n_tandas">…</b><span>tandas terminadas</span></div>
+</div>
+
+<h2>¿Les acerca a la comunidad?</h2>
+<div class="cajas">
+  <div class="caja gorda"><b id="n_skool">…</b><span>toques a «ir a la comunidad» (en total)</span></div>
+  <div class="caja"><b id="n_skool_portada">…</b><span>desde la portada</span></div>
+  <div class="caja"><b id="n_skool_final">…</b><span>al acabar una tanda</span></div>
+  <div class="caja"><b id="n_skool_idea">…</b><span>desde «¿echas algo en falta?»</span></div>
+</div>
+
+<h2>¿Lo usan las logopedas?</h2>
+<div class="cajas">
+  <div class="caja"><b id="n_preparada">…</b><span>partidas preparadas</span></div>
+  <div class="caja"><b id="n_enlace">…</b><span>enlaces creados para familias</span></div>
+  <div class="caja"><b id="n_familia">…</b><span>veces abierto desde un enlace de familia</span></div>
+  <div class="caja"><b id="n_informe">…</b><span>informes compartidos</span></div>
+</div>
+
+<h2>Últimos 10 días</h2>
+<p class="nota" id="cargando">Los números van llegando poco a poco (unos 15 segundos).</p>
+<table><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th></tr></thead><tbody id="dias"></tbody></table>
+
+<p style="margin-top:18px"><button type="button" onclick="location.reload()">↻ Actualizar</button></p>
+
+<h2>Cómo leer esto</h2>
+<p class="nota"><b>Aparatos distintos</b> es lo más parecido a «personas»: cada móvil, tableta u ordenador cuenta una vez. Si alguien lo abre en el móvil y en el ordenador, cuenta dos; si borra los datos del navegador, vuelve a contar.</p>
+<p class="nota">El recuento de aparatos y el de días empezó el <b>13 de octubre de 2026</b>. Las aperturas de antes (16, casi todas de pruebas) están en el total de aperturas pero no en la tabla.</p>
+<p class="nota">No se guarda nada de nadie: solo estas sumas. Sin nombres, sin cuentas y sin cookies.</p>
+<p class="nota"><b>Para que tu aparato no cuente:</b> abre una vez <a href="./?yo=1">el juego con ?yo=1</a> en cada aparato tuyo. Para que vuelva a contar, <a href="./?yo=0">ábrelo con ?yo=0</a>.</p>
+
+<script>
+(function () {
+  var BASE = 'https://abacus.jasoncameron.dev/get/foniafonia-juegos/';
+  /* El servicio admite 30 consultas cada 10 segundos: se piden de una en una, con un respiro
+     entre ellas, y si aun así dice «demasiadas», se espera y se repite. Por eso los números
+     van apareciendo poco a poco. Una clave que aún no existe (404) vale cero. */
+  var cola = Promise.resolve();
+  function pausa(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function pide(k, intento) {
+    return fetch(BASE + k).then(function (r) {
+      if (r.status === 404) return 0;
+      if (r.status === 429 && intento < 3) return pausa(4000).then(function () { return pide(k, intento + 1); });
+      if (!r.ok) return null;
+      return r.json().then(function (j) { return j && j.value ? j.value : 0; });
+    }).catch(function () { return null; });
+  }
+  function lee(k) { var p = cola.then(function () { return pide(k, 0); }); cola = p.then(function () { return pausa(380); }); return p; }
+  function pon(id, v) { document.getElementById(id).textContent = v === null ? '—' : v; }
+  var d0 = new Date(); document.getElementById('hora').textContent = 'Mirado el ' + d0.toLocaleDateString('es-ES') + ' a las ' + d0.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + '.';
+  [['n_personas', 'snake_personas'], ['n_aperturas', 'snake_aperturas'], ['n_partidas', 'snake_partidas'], ['n_tandas', 'snake_tandas_terminadas'],
+   ['n_skool_portada', 'snake_skool_portada'], ['n_skool_final', 'snake_skool_final'],
+   ['n_preparada', 'snake_partida_preparada'], ['n_enlace', 'snake_enlace_familia'], ['n_familia', 'snake_aperturas_enlace_familia'], ['n_informe', 'snake_informe_compartido']
+  ].forEach(function (p) { lee(p[1]).then(function (v) { pon(p[0], v); }); });
+  Promise.all(['snake_skool_portada', 'snake_skool_final', 'snake_skool_idea_portada', 'snake_skool_idea_final'].map(lee)).then(function (v) {
+    var n = function (x) { return x || 0; };
+    pon('n_skool', n(v[0]) + n(v[1]) + n(v[2]) + n(v[3])); pon('n_skool_idea', n(v[2]) + n(v[3]));
+  });
+  var dias = [], hoy = new Date();
+  for (var i = 0; i < 10; i++) { var d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i); dias.push(d); }
+  function clave(d) { return d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2); }
+  Promise.all(dias.map(function (d) { var k = clave(d); return Promise.all([lee('snake_personas_' + k), lee('snake_aperturas_' + k), lee('snake_partidas_' + k)]); })).then(function (filas) {
+    var tope = 1; filas.forEach(function (f) { if (f[0] > tope) tope = f[0]; });
+    var tb = document.getElementById('dias'); tb.innerHTML = '';
+    filas.forEach(function (f, i) {
+      var tr = document.createElement('tr'), d = dias[i];
+      var c0 = document.createElement('td'); c0.textContent = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+      var c1 = document.createElement('td'); var b = document.createElement('span'); b.className = 'barra'; b.style.width = Math.round(80 * (f[0] || 0) / tope) + 'px'; if (f[0]) c1.appendChild(b); c1.appendChild(document.createTextNode(f[0] === null ? '—' : f[0]));
+      var c2 = document.createElement('td'); c2.textContent = f[1] === null ? '—' : f[1];
+      var c3 = document.createElement('td'); c3.textContent = f[2] === null ? '—' : f[2];
+      tr.appendChild(c0); tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tb.appendChild(tr);
+    });
+    document.getElementById('cargando').style.display = 'none';
+  });
+})();
+</script>
+</body>
+</html>

@@ -10,8 +10,29 @@
   function velo(id, on) { $(id).className = 'velo' + (on ? ' on' : ''); }
   function norm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
   var CONTADOR = 'https://abacus.jasoncameron.dev/hit/foniafonia-juegos/';
-  function suma(k) { try { if (window.fetch) fetch(CONTADOR + k, { keepalive: true }).catch(function () { }); } catch (e) { } }
-  suma('snake_aperturas');
+  /* Cuánta gente lo abre (José, 13/10: «muy importante»). Solo sumas anónimas, sin cuentas ni
+     cookies: aperturas, aparatos distintos (una marca en este aparato dice si ya vino), partidas
+     y tandas, y lo mismo por día. Con ?yo=1 este aparato deja de contar (para José y las pruebas);
+     ?yo=0 lo vuelve a contar. Se ve todo en estadisticas.html. */
+  var MIO = false;
+  try {
+    if (QS.get('yo') === '1') localStorage.setItem('snake-no-contar', '1');
+    if (QS.get('yo') === '0') localStorage.removeItem('snake-no-contar');
+    MIO = localStorage.getItem('snake-no-contar') === '1';
+  } catch (e) { }
+  function hoy() { var d = new Date(); return d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2); }
+  function suma(k) { if (MIO) return; try { if (window.fetch) fetch(CONTADOR + k, { keepalive: true }).catch(function () { }); } catch (e) { } }
+  suma('snake_aperturas'); suma('snake_aperturas_' + hoy());
+  try {
+    if (!MIO && !localStorage.getItem('snake-visto')) { localStorage.setItem('snake-visto', hoy()); suma('snake_personas'); suma('snake_personas_' + hoy()); }
+  } catch (e) { }
+  if (document.body.className.indexOf('fijado') >= 0) suma('snake_aperturas_enlace_familia');
+  /* una partida empieza cuando el juego enseña la cruceta (vale igual con dedo que con ratón) */
+  (function () {
+    var cruz = document.getElementById('dpad'), puesta = false;
+    function mira() { var on = cruz.className === 'on'; if (on && !puesta) { suma('snake_partidas'); suma('snake_partidas_' + hoy()); } puesta = on; }
+    if (window.MutationObserver) new MutationObserver(mira).observe(cruz, { attributes: true, attributeFilter: ['class'] }); else setInterval(mira, 700);
+  })();
   var enl = document.querySelectorAll('a[data-skool]');
   for (var i = 0; i < enl.length; i++) enl[i].addEventListener('click', (function (d) { return function () { suma('snake_skool_' + d); }; })(enl[i].getAttribute('data-skool')));
 
@@ -180,6 +201,7 @@
     });
     lineas.push('Lo mide el juego con lo que toca la serpiente: orienta, no diagnostica.');
     textoInforme = lineas.join('\n'); $('infDicho').textContent = '';
+    suma('snake_tandas_terminadas');
   }
   $('infCompartir').onclick = function () { comparte(textoInforme, '', $('infDicho')); suma('snake_informe_compartido'); };
   $('infCopiar').onclick = function () { copia(textoInforme, $('infDicho')); };
