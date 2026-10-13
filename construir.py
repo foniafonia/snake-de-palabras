@@ -25,8 +25,8 @@ def cambia(viejo, nuevo, veces=1):
 # --- cabecera ---
 cambia('<title>Snake de palabras · Gabinete Fönia</title>',
        '<title>Snake de palabras · ColmenIA</title>\n'
-       '<meta name="description" content="Juego gratis de lectura: la serpiente solo come las palabras que cumplen la regla (empiezan por R, tienen dos sílabas…). Hecho en el laboratorio de Gabinete Fönia, lo entrega ColmenIA.">\n'
-       '<meta property="og:title" content="Snake de palabras · juego gratis de lectura">\n'
+       '<meta name="description" content="Juego de lectura: la serpiente solo come las palabras que cumplen la regla (empiezan por R, tienen dos sílabas…). Hecho en el laboratorio de Gabinete Fönia, lo entrega ColmenIA.">\n'
+       '<meta property="og:title" content="Snake de palabras · juego de lectura">\n'
        '<meta property="og:description" content="La serpiente solo come las palabras que cumplen la regla. Tú eliges la regla.">\n'
        '<meta property="og:image" content="https://foniafonia.github.io/snake-de-palabras/portada/portada-ancha.jpg">\n'
        '<meta property="og:type" content="website">\n<meta name="twitter:card" content="summary_large_image">')
@@ -61,7 +61,7 @@ def boton(donde, titulo, sub):
             '<span class="cta-abeja" aria-hidden="true">🐝</span>'
             '<span class="cta-txt"><b>%s</b><span>%s</span>'
             '<span class="cta-lista"><i>🏎️ FonoKart</i><i>🏃 FonoDash</i><i>🐍 y los que van saliendo</i></span></span>'
-            '<span class="cta-ir">Entrar gratis <span aria-hidden="true">→</span></span></a>' % (donde, SKOOL, titulo, sub))
+            '<span class="cta-ir">Entrar <span aria-hidden="true">→</span></span></a>' % (donde, SKOOL, titulo, sub))
 def idea(donde):
     return ('<a class="idea" data-skool="%s" href="%s" target="_blank" rel="noopener">💡 ¿Echas algo en falta o has visto un fallo? Cuéntalo en la comunidad</a>' % (donde, SKOOL))
 
@@ -133,12 +133,12 @@ cambia("envia(false).then(function (r) { $('finEnvio').textContent = r === 'ok' 
 DESPEDIDA = ('<div class="despedida" id="vDespedida" role="dialog" aria-label="Antes de irte">'
              '<div class="despedida-caja"><button type="button" id="dCerrar" class="despedida-x" aria-label="Cerrar">✕</button>'
              '<p class="despedida-t">Antes de irte…</p>'
-             + boton('despedida', 'Llévate más juegos como este', 'Están en ColmenIA, la comunidad de más de 170 logopedas y maestras. Es gratis.')
+             + boton('despedida', 'Llévate más juegos como este', 'Están en ColmenIA, la comunidad de más de 170 logopedas y maestras.')
              + '</div></div>\n')
 cambia('<script src="snake-voz/indice.js"></script>', DESPEDIDA + '<script src="snake-voz/indice.js"></script>')
 cambia('<button class="btn s" id="bAcabar" type="button">Terminar la tanda</button></div></div>',
        '<button class="btn s" id="bAcabar" type="button">Terminar la tanda</button>'
-       + boton('pausa', '¿Te vas? Llévate más juegos', 'En ColmenIA, la comunidad de logopedas y maestras. Es gratis.') + '</div></div>')
+       + boton('pausa', '¿Te vas? Llévate más juegos', 'En ColmenIA, la comunidad de logopedas y maestras.') + '</div></div>')
 
 # --- el guion de lo añadido, dentro de la página ---
 cambia('</body>', '<script>\n' + (AQUI / 'extra.js').read_text(encoding='utf-8') + '</script>\n</body>')

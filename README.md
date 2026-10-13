@@ -1,6 +1,6 @@
 # Snake de palabras
 
-Juego gratuito de lectura. La serpiente solo debe comer las palabras que cumplen la regla
+Juego de lectura. La serpiente solo debe comer las palabras que cumplen la regla
 (empiezan por R, contienen una letra, terminan en…, tienen dos sílabas). Si come una que no la
 cumple, el juego dice por qué y se sigue jugando: no hay vidas ni muertes.
 
