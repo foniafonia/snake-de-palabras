@@ -13,13 +13,11 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🐍%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <script>
 /* si algo falla al arrancar, que quede apuntado (solo la suma) y que se diga en pantalla */
 window.addEventListener("error", function (e) {
   if (window.__snakeFallo) return; window.__snakeFallo = true;
-  try { new Image().src = "https://abacus.jasoncameron.dev/hit/foniafonia-juegos/snake_fallo"; } catch (x) {}
+  try { if (localStorage.getItem("snake-no-contar") !== "1") new Image().src = "https://abacus.jasoncameron.dev/hit/foniafonia-juegos/snake_fallo"; } catch (x) {}
   try { if (e && e.target && e.target.tagName) return; var d = document.createElement("p"); d.setAttribute("role", "alert");
     d.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:99;margin:0;padding:10px 12px;border-radius:12px;background:#FFF8E7;color:#10231A;font:15px/1.4 system-ui,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.4)";
     d.textContent = "Algo ha fallado al abrir el juego en este navegador. Prueba a abrir el enlace en Chrome o Safari (no dentro de WhatsApp o Telegram).";
@@ -27,6 +25,19 @@ window.addEventListener("error", function (e) {
 });
 </script>
 <style>
+/* Letras guardadas dentro del juego (13/10/2026) para no pedirlas a Google: así la dirección
+   de internet de quien juega no sale hacia allí. Atkinson Hyperlegible (Braille Institute) y
+   Jost (Owen Earl), las dos con licencia SIL Open Font License 1.1. Solo los juegos de
+   caracteres latinos. */
+@font-face{font-family:'Atkinson Hyperlegible';font-style:normal;font-weight:400;font-display:swap;src:url(fuentes/atkinson-hyperlegible-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Atkinson Hyperlegible';font-style:normal;font-weight:400;font-display:swap;src:url(fuentes/atkinson-hyperlegible-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Atkinson Hyperlegible';font-style:normal;font-weight:700;font-display:swap;src:url(fuentes/atkinson-hyperlegible-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Atkinson Hyperlegible';font-style:normal;font-weight:700;font-display:swap;src:url(fuentes/atkinson-hyperlegible-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Jost';font-style:normal;font-weight:500;font-display:swap;src:url(fuentes/jost-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Jost';font-style:normal;font-weight:500;font-display:swap;src:url(fuentes/jost-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Jost';font-style:normal;font-weight:600;font-display:swap;src:url(fuentes/jost-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Jost';font-style:normal;font-weight:600;font-display:swap;src:url(fuentes/jost-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+
 /* SNAKE DE PALABRAS · versión 2 (12/10/2026). Idea del prototipo «Snake 3D · Palabras» de José, rehecha de cero:
    juego 2D de alta definición, movimiento suave, sin muertes (los fallos enseñan por qué), tandas cortas,
    dificultad que se adapta sola, voz Piper al comer, y un registro clínico de qué palabras confunde.
@@ -183,7 +194,8 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
       <a class="cta" data-skool="portada" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener"><span class="cta-abeja" aria-hidden="true">🐝</span><span class="cta-txt"><b>¿Te ha gustado? Hay más juegos como este</b><span>En ColmenIA, la comunidad de más de 170 logopedas y maestras que usan la IA en su trabajo.</span><span class="cta-lista"><i>🏎️ FonoKart</i><i>🏃 FonoDash</i><i>🐍 y los que van saliendo</i></span></span><span class="cta-ir">Entrar <span aria-hidden="true">→</span></span></a>
       <a class="idea" data-skool="idea_portada" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener">💡 ¿Echas algo en falta o has visto un fallo? Cuéntalo en la comunidad</a>
       <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>
-      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda. No guarda ni envía datos.</p>
+      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda.</p>
+      <p class="nota">Sin registro. Los resultados no salen de este aparato si no los compartes tú. Solo se cuenta, de forma anónima, cuánta gente lo usa. <a href="privacidad.html">Privacidad</a></p>
     </div></div>
 
     <div class="velo" id="vPrepara"><div class="tarjeta prep">
@@ -610,7 +622,7 @@ function terminar(motivo) {
   var ff = '';
   if (S.errores.length) { ff = '<p style="margin:10px 0 0;font-weight:700">Para recordar:</p><ul class="fallos">' + S.errores.slice(0, 5).map(function (e) { return '<li><b>' + e.w + '</b>: ' + e.por + '</li>'; }).join('') + '</ul>'; }
   $('finFallos').innerHTML = ff;
-  $('finEnvio').textContent = 'Nada sale de este aparato si no lo compartes tú.';
+  $('finEnvio').textContent = 'Este informe no sale de este aparato si no lo compartes tú.';
   velo('vFin', true); $('dpad').className = '';
   envia(false);
 }

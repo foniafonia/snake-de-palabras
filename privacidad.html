@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacidad · Snake de palabras</title>
+<style>
+  body{font:18px/1.55 system-ui,-apple-system,sans-serif;max-width:640px;margin:0 auto;padding:24px 18px 60px;background:#FFF8E7;color:#10231A}
+  h1{font-size:27px;margin:0 0 6px}h2{font-size:20px;margin:26px 0 6px}
+  p,li{margin:0 0 10px}ul{padding-left:22px}
+  .corto{background:#fff;border:2px solid #cfd8d2;border-radius:16px;padding:14px 16px}
+  .btn{display:inline-block;font:inherit;font-weight:700;padding:11px 16px;border-radius:14px;border:0;background:#10231A;color:#FFF8E7;cursor:pointer;text-decoration:none}
+  .btn.s{background:#fff;color:#10231A;border:2px solid #cfd8d2}
+  a{color:#1E7B4B}.pie{font-size:15px;color:#4d6457;margin-top:28px}
+  #dicho{font-weight:700;min-height:1.4em}
+</style>
+</head>
+<body>
+<p><a href="./">← Volver al juego</a></p>
+<h1>Privacidad</h1>
+<div class="corto">
+  <p><b>En corto:</b> no pedimos nombre, correo ni registro. Lo que hace el niño en el juego se queda en su aparato. Solo contamos, sin saber quién es nadie, cuánta gente usa el juego. Y puedes apagar ese recuento con el botón de abajo.</p>
+</div>
+
+<h2>Qué se queda en tu aparato</h2>
+<ul>
+  <li>La última regla que elegiste, para no tener que ponerla otra vez.</li>
+  <li>Una marca que dice «este aparato ya ha entrado», para no contarlo dos veces. No lleva ningún número que te identifique.</li>
+  <li>Una marca si has ido a la comunidad, para no volver a enseñarte el aviso.</li>
+</ul>
+<p>Nada de esto sale del aparato. Se borra al borrar los datos del navegador.</p>
+
+<h2>Qué se cuenta</h2>
+<p>Sumas, y nada más: cuántos aparatos lo abren, cuántas partidas se empiezan y se terminan, y cuántas veces se toca el botón de la comunidad. No se apunta qué palabras salen, ni los aciertos, ni los fallos.</p>
+<p>Para sumar, tu navegador hace una llamada a un servicio de contadores (abacus.jasoncameron.dev). Como en cualquier llamada de internet, ese servicio ve la dirección de internet (IP) desde la que llega; nosotros no la recibimos ni la guardamos.</p>
+
+<h2>El informe de la tanda</h2>
+<p>Se prepara en tu aparato y se ve solo ahí. Si pulsas «Enviar a mi logopeda» o «Copiar», eres tú quien lo manda, por la aplicación que elijas y a quien elijas. A nosotros no nos llega.</p>
+
+<h2>Qué no hay</h2>
+<ul>
+  <li>Cookies, publicidad ni seguimiento entre páginas.</li>
+  <li>Letras, imágenes o voces pedidas a otras empresas: van dentro del juego.</li>
+  <li>Micrófono ni cámara.</li>
+</ul>
+
+<h2>Dónde está alojado</h2>
+<p>La página se sirve desde GitHub Pages. Como cualquier servidor web, GitHub ve la dirección de internet desde la que se pide la página.</p>
+
+<h2>Apagar el recuento en este aparato</h2>
+<p><button class="btn" type="button" id="apaga">No contar este aparato</button> <button class="btn s" type="button" id="enciende">Volver a contarlo</button></p>
+<p id="dicho" role="status"></p>
+
+<h2>Quién responde</h2>
+<p>Gabinete Fönia (José Aserraf), que hace el juego, y ColmenIA, que lo entrega. Para cualquier duda o para pedir que cambiemos algo, escríbenos en <a href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener">la comunidad de ColmenIA</a>.</p>
+
+<p class="pie">El juego es material de apoyo y no sustituye a la logopeda. Última revisión de esta página: 13 de octubre de 2026.</p>
+
+<script>
+(function () {
+  var d = document.getElementById('dicho');
+  function estado() { var no = false; try { no = localStorage.getItem('snake-no-contar') === '1'; } catch (e) { } d.textContent = no ? 'Ahora mismo este aparato NO se cuenta.' : 'Ahora mismo este aparato sí se cuenta (solo como una suma).'; }
+  document.getElementById('apaga').onclick = function () { try { localStorage.setItem('snake-no-contar', '1'); } catch (e) { } estado(); };
+  document.getElementById('enciende').onclick = function () { try { localStorage.removeItem('snake-no-contar'); } catch (e) { } estado(); };
+  estado();
+})();
+</script>
+</body>
+</html>

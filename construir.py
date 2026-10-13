@@ -38,16 +38,19 @@ cambia('<link rel="icon" href="../equipo/icono-192.png">',
 # fuentes de Google frenaba el pintado hasta llegar: ahora se pide sin frenar y, mientras, se
 # ve con la letra del aparato.)
 cambia('<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet">',
-       '<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'">\n'
        '<script>\n/* si algo falla al arrancar, que quede apuntado (solo la suma) y que se diga en pantalla */\n'
        'window.addEventListener("error", function (e) {\n'
        '  if (window.__snakeFallo) return; window.__snakeFallo = true;\n'
-       '  try { new Image().src = "https://abacus.jasoncameron.dev/hit/foniafonia-juegos/snake_fallo"; } catch (x) {}\n'
+       '  try { if (localStorage.getItem("snake-no-contar") !== "1") new Image().src = "https://abacus.jasoncameron.dev/hit/foniafonia-juegos/snake_fallo"; } catch (x) {}\n'
        '  try { if (e && e.target && e.target.tagName) return; var d = document.createElement("p"); d.setAttribute("role", "alert");\n'
        '    d.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:99;margin:0;padding:10px 12px;border-radius:12px;background:#FFF8E7;color:#10231A;font:15px/1.4 system-ui,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.4)";\n'
        '    d.textContent = "Algo ha fallado al abrir el juego en este navegador. Prueba a abrir el enlace en Chrome o Safari (no dentro de WhatsApp o Telegram).";\n'
        '    (document.body || document.documentElement).appendChild(d); } catch (x) {}\n'
        '});\n</script>')
+
+# --- las letras, dentro del juego: nada se pide a Google ---
+cambia('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n', '')
+cambia('<style>', '<style>\n' + (AQUI / 'fuentes/fuentes.css').read_text(encoding='utf-8'))
 
 # --- fuera el gabinete ---
 cambia('<script src="../pauta-familia.js"></script>\n', '')
@@ -92,7 +95,8 @@ PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta conportada"
       """ + boton('portada', '¿Te ha gustado? Hay más juegos como este', 'En ColmenIA, la comunidad de más de 170 logopedas y maestras que usan la IA en su trabajo.') + """
       """ + idea('idea_portada') + """
       <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>
-      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda. No guarda ni envía datos.</p>
+      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda.</p>
+      <p class="nota">Sin registro. Los resultados no salen de este aparato si no los compartes tú. Solo se cuenta, de forma anónima, cuánta gente lo usa. <a href="privacidad.html">Privacidad</a></p>
     </div></div>
 
     <div class="velo" id="vPrepara"><div class="tarjeta prep">
@@ -141,7 +145,7 @@ cambia('      <p class="nota" id="finEnvio"></p>\n      <button class="btn" id="
        '      ' + boton('final', '¡Tanda hecha! ¿Quieres más juegos así?', 'Están en ColmenIA, la comunidad de más de 170 logopedas y maestras.') + '\n'
        '      ' + idea('idea_final'))
 cambia("$('finEnvio').textContent = CASO ? 'Enviando el resultado al gabinete…' : 'Resultado guardado solo en este aparato.';",
-       "$('finEnvio').textContent = 'Nada sale de este aparato si no lo compartes tú.';")
+       "$('finEnvio').textContent = 'Este informe no sale de este aparato si no lo compartes tú.';")
 cambia("envia(false).then(function (r) { $('finEnvio').textContent = r === 'ok' ? '✔ Resultado enviado al gabinete.' : (r === 'cola' ? 'Guardado: se enviará cuando haya conexión.' : 'Resultado guardado solo en este aparato.'); });",
        "envia(false);")
 
