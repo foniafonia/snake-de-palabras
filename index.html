@@ -14,7 +14,18 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🐍%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<script>
+/* si algo falla al arrancar, que quede apuntado (solo la suma) y que se diga en pantalla */
+window.addEventListener("error", function (e) {
+  if (window.__snakeFallo) return; window.__snakeFallo = true;
+  try { new Image().src = "https://abacus.jasoncameron.dev/hit/foniafonia-juegos/snake_fallo"; } catch (x) {}
+  try { if (e && e.target && e.target.tagName) return; var d = document.createElement("p"); d.setAttribute("role", "alert");
+    d.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:99;margin:0;padding:10px 12px;border-radius:12px;background:#FFF8E7;color:#10231A;font:15px/1.4 system-ui,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.4)";
+    d.textContent = "Algo ha fallado al abrir el juego en este navegador. Prueba a abrir el enlace en Chrome o Safari (no dentro de WhatsApp o Telegram).";
+    (document.body || document.documentElement).appendChild(d); } catch (x) {}
+});
+</script>
 <style>
 /* SNAKE DE PALABRAS · versión 2 (12/10/2026). Idea del prototipo «Snake 3D · Palabras» de José, rehecha de cero:
    juego 2D de alta definición, movimiento suave, sin muertes (los fallos enseñan por qué), tandas cortas,

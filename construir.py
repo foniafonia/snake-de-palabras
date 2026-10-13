@@ -33,6 +33,22 @@ cambia('<title>Snake de palabras · Gabinete Fönia</title>',
 cambia('<link rel="icon" href="../equipo/icono-192.png">',
        '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🐍%3C/text%3E%3C/svg%3E">')
 
+# --- que una red lenta o que bloquee las fuentes no deje la página en blanco ---
+# (13/10: una logopeda del grupo, «a mí no se me abre»; a otras 55 personas sí. La hoja de
+# fuentes de Google frenaba el pintado hasta llegar: ahora se pide sin frenar y, mientras, se
+# ve con la letra del aparato.)
+cambia('<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet">',
+       '<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Jost:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'">\n'
+       '<script>\n/* si algo falla al arrancar, que quede apuntado (solo la suma) y que se diga en pantalla */\n'
+       'window.addEventListener("error", function (e) {\n'
+       '  if (window.__snakeFallo) return; window.__snakeFallo = true;\n'
+       '  try { new Image().src = "https://abacus.jasoncameron.dev/hit/foniafonia-juegos/snake_fallo"; } catch (x) {}\n'
+       '  try { if (e && e.target && e.target.tagName) return; var d = document.createElement("p"); d.setAttribute("role", "alert");\n'
+       '    d.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:99;margin:0;padding:10px 12px;border-radius:12px;background:#FFF8E7;color:#10231A;font:15px/1.4 system-ui,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.4)";\n'
+       '    d.textContent = "Algo ha fallado al abrir el juego en este navegador. Prueba a abrir el enlace en Chrome o Safari (no dentro de WhatsApp o Telegram).";\n'
+       '    (document.body || document.documentElement).appendChild(d); } catch (x) {}\n'
+       '});\n</script>')
+
 # --- fuera el gabinete ---
 cambia('<script src="../pauta-familia.js"></script>\n', '')
 cambia('<script src="/bichito-revision.js"></script>\n', '')
