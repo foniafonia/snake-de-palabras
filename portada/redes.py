@@ -49,7 +49,7 @@ def lamina(W, H, nombre, alto_movil, y_movil, titulo_t, sub_t, pie_y):
         w = d.textlength(txt, font=et); d.text((cx - w / 2, y_movil + tab.height + 14), txt, font=et, fill=CREMA)
     # pie
     caja_y = pie_y; d.rounded_rectangle((60, caja_y, W - 60, caja_y + (92 if H > 1100 else 78)), radius=24, fill=ORO)
-    centro(d, 'Gratis · foniafonia.github.io/snake-de-palabras', f(34 if H > 1100 else 29, 0), caja_y + (24 if H > 1100 else 20), W, TINTA)
+    centro(d, 'Pruébalo · foniafonia.github.io/snake-de-palabras', f(34 if H > 1100 else 29, 0), caja_y + (24 if H > 1100 else 20), W, TINTA)
     centro(d, 'Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA', f(23 if H > 1100 else 21, 7), caja_y + (104 if H > 1100 else 88), W, (200, 225, 210))
     base.convert('RGB').save(nombre, quality=88, optimize=True, progressive=True)
     print(nombre, base.size)
