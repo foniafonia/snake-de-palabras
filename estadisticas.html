@@ -54,19 +54,21 @@
   <div class="caja"><b id="n_informe">…</b><span>informes compartidos</span></div>
 </div>
 
-<h2>Últimos 7 días</h2>
-<p class="nota" id="cargando">Los números van llegando poco a poco (unos 25 segundos).</p>
-<table><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th><th>A Skool</th></tr></thead><tbody id="dias"></tbody></table>
+<h2>Últimos 14 días</h2>
+<p class="nota" id="cargando">Los números van llegando poco a poco (unos 50 segundos).</p>
+<div id="grafica"></div>
+<table><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th><th>Terminadas</th><th>A Skool</th></tr></thead><tbody id="dias"></tbody></table>
 
 <p style="margin-top:18px"><button type="button" onclick="location.reload()">↻ Actualizar</button></p>
 
 <h2>Cómo leer esto</h2>
 <p class="nota"><b>Aparatos distintos</b> es lo más parecido a «personas»: cada móvil, tableta u ordenador cuenta una vez. Si alguien lo abre en el móvil y en el ordenador, cuenta dos; si borra los datos del navegador, vuelve a contar.</p>
-<p class="nota">El recuento de aparatos y el de días empezó el <b>13 de octubre de 2026</b>. Las aperturas de antes (16, casi todas de pruebas) están en el total de aperturas pero no en la tabla.</p>
+<p class="nota">El recuento de aparatos y el de días empezó el <b>13 de octubre de 2026</b>. Las aperturas de antes (16, casi todas de pruebas) están en el total de aperturas pero no en la tabla. Las partidas terminadas por día se cuentan desde el <b>18 de octubre de 2026</b> (antes, «—»).</p>
 <p class="nota"><b>Lo que esta página no puede saber:</b> cuántos de los que tocan el botón se apuntan de verdad a la comunidad. Eso solo lo ve Skool, en su propio panel de miembros. Aquí se cuenta hasta el momento en que salen hacia allí.</p>
 <p class="nota">No se guarda nada de nadie: solo estas sumas. Sin nombres, sin cuentas y sin cookies.</p>
 <p class="nota"><b>Para que tu aparato no cuente:</b> abre una vez <a href="./?yo=1">el juego con ?yo=1</a> en cada aparato tuyo. Para que vuelva a contar, <a href="./?yo=0">ábrelo con ?yo=0</a>.</p>
 
+<script src="grafica-uso.js?v=1018"></script>
 <script>
 (function () {
   var BASE = 'https://abacus.jasoncameron.dev/get/foniafonia-juegos/';
@@ -96,9 +98,9 @@
     pon('n_skool_pausa', n(v[4])); pon('n_skool_despedida', n(v[5]));
   });
   var dias = [], hoy = new Date();
-  for (var i = 0; i < 7; i++) { var d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i); dias.push(d); }
+  for (var i = 0; i < 14; i++) { var d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i); dias.push(d); }
   function clave(d) { return d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2); }
-  Promise.all(dias.map(function (d) { var k = clave(d); return Promise.all([lee('snake_personas_' + k), lee('snake_aperturas_' + k), lee('snake_partidas_' + k), lee('snake_skool_dia_' + k)]); })).then(function (filas) {
+  Promise.all(dias.map(function (d) { var k = clave(d); return Promise.all([lee('snake_personas_' + k), lee('snake_aperturas_' + k), lee('snake_partidas_' + k), lee('snake_skool_dia_' + k), k < '20261018' ? Promise.resolve(null) : lee('snake_tandas_terminadas_' + k)]); })).then(function (filas) {
     var tope = 1; filas.forEach(function (f) { if (f[0] > tope) tope = f[0]; });
     var tb = document.getElementById('dias'); tb.innerHTML = '';
     filas.forEach(function (f, i) {
@@ -108,8 +110,10 @@
       var c2 = document.createElement('td'); c2.textContent = f[1] === null ? '—' : f[1];
       var c3 = document.createElement('td'); c3.textContent = f[2] === null ? '—' : f[2];
       var c4 = document.createElement('td'); c4.textContent = f[3] === null ? '—' : f[3];
-      tr.appendChild(c0); tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4); tb.appendChild(tr);
+      var c5 = document.createElement('td'); c5.textContent = f[4] === null ? '—' : f[4];
+      tr.appendChild(c0); tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c5); tr.appendChild(c4); tb.appendChild(tr);
     });
+    GraficaUso(document.getElementById('grafica'), filas.map(function (f, i) { return { d: dias[i], personas: f[0], terminadas: f[4], skool: f[3] }; }).reverse());
     document.getElementById('cargando').style.display = 'none';
   });
 })();

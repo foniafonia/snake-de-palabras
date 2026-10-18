@@ -245,7 +245,7 @@
     });
     lineas.push('Lo mide el juego con lo que toca la serpiente: orienta, no diagnostica.');
     textoInforme = lineas.join('\n'); $('infDicho').textContent = '';
-    suma('snake_tandas_terminadas');
+    suma('snake_tandas_terminadas'); suma('snake_tandas_terminadas_' + hoy());
   }
   $('infCompartir').onclick = function () { comparte(textoInforme, '', $('infDicho')); suma('snake_informe_compartido'); };
   $('infCopiar').onclick = function () { copia(textoInforme, $('infDicho')); };
