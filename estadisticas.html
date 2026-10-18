@@ -58,9 +58,11 @@
 <h2>Últimos 14 días</h2>
 <p class="nota" id="cargando">Los números van llegando poco a poco (unos 50 segundos).</p>
 <div id="grafica"></div>
-<div style="overflow-x:auto"><table class="dias"><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th><th>Terminadas</th><th>A Skool</th></tr></thead><tbody id="dias"></tbody></table></div>
+<div style="overflow-x:auto"><table class="dias"><thead><tr><th>Día</th><th>Nuevos</th><th>Abren</th><th>Partidas</th><th>Acaban</th><th>Skool</th></tr></thead><tbody id="dias"></tbody></table></div>
 
 <p style="margin-top:18px"><button type="button" onclick="location.reload()">↻ Actualizar</button></p>
+
+<p class="nota">En la tabla: <b>Nuevos</b>, aparatos que lo abren por primera vez · <b>Abren</b>, aperturas · <b>Partidas</b>, empezadas · <b>Acaban</b>, partidas terminadas · <b>Skool</b>, pulsaciones hacia la comunidad.</p>
 
 <h2>Cómo leer esto</h2>
 <p class="nota"><b>Aparatos distintos</b> es lo más parecido a «personas»: cada móvil, tableta u ordenador cuenta una vez. Si alguien lo abre en el móvil y en el ordenador, cuenta dos; si borra los datos del navegador, vuelve a contar.</p>
@@ -107,7 +109,7 @@
     filas.forEach(function (f, i) {
       var tr = document.createElement('tr'), d = dias[i];
       var c0 = document.createElement('td'); c0.textContent = d.toLocaleDateString('es-ES', { weekday: 'short' }) + ' ' + d.getDate() + '/' + (d.getMonth() + 1); c0.style.whiteSpace = 'nowrap';
-      var c1 = document.createElement('td'); var b = document.createElement('span'); b.className = 'barra'; b.style.width = Math.round(80 * (f[0] || 0) / tope) + 'px'; if (f[0]) c1.appendChild(b); c1.appendChild(document.createTextNode(f[0] === null ? '—' : f[0]));
+      var c1 = document.createElement('td'); var b = document.createElement('span'); b.className = 'barra'; b.style.width = Math.round(40 * (f[0] || 0) / tope) + 'px'; if (f[0]) c1.appendChild(b); c1.appendChild(document.createTextNode(f[0] === null ? '—' : f[0]));
       var c2 = document.createElement('td'); c2.textContent = f[1] === null ? '—' : f[1];
       var c3 = document.createElement('td'); c3.textContent = f[2] === null ? '—' : f[2];
       var c4 = document.createElement('td'); c4.textContent = f[3] === null ? '—' : f[3];
