@@ -21,6 +21,7 @@
   .nota{font-size:14px;color:#4d6457}
   button{font:inherit;font-weight:700;padding:10px 16px;border-radius:12px;border:0;background:#2FA866;color:#fff;cursor:pointer}
   a{color:#1E7B4B}
+  @media (max-width:480px){table.dias{font-size:14px}table.dias th,table.dias td{padding:6px 5px}}
 </style>
 </head>
 <body>
@@ -57,7 +58,7 @@
 <h2>Últimos 14 días</h2>
 <p class="nota" id="cargando">Los números van llegando poco a poco (unos 50 segundos).</p>
 <div id="grafica"></div>
-<table><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th><th>Terminadas</th><th>A Skool</th></tr></thead><tbody id="dias"></tbody></table>
+<div style="overflow-x:auto"><table class="dias"><thead><tr><th>Día</th><th>Aparatos nuevos</th><th>Aperturas</th><th>Partidas</th><th>Terminadas</th><th>A Skool</th></tr></thead><tbody id="dias"></tbody></table></div>
 
 <p style="margin-top:18px"><button type="button" onclick="location.reload()">↻ Actualizar</button></p>
 
@@ -105,7 +106,7 @@
     var tb = document.getElementById('dias'); tb.innerHTML = '';
     filas.forEach(function (f, i) {
       var tr = document.createElement('tr'), d = dias[i];
-      var c0 = document.createElement('td'); c0.textContent = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+      var c0 = document.createElement('td'); c0.textContent = d.toLocaleDateString('es-ES', { weekday: 'short' }) + ' ' + d.getDate() + '/' + (d.getMonth() + 1); c0.style.whiteSpace = 'nowrap';
       var c1 = document.createElement('td'); var b = document.createElement('span'); b.className = 'barra'; b.style.width = Math.round(80 * (f[0] || 0) / tope) + 'px'; if (f[0]) c1.appendChild(b); c1.appendChild(document.createTextNode(f[0] === null ? '—' : f[0]));
       var c2 = document.createElement('td'); c2.textContent = f[1] === null ? '—' : f[1];
       var c3 = document.createElement('td'); c3.textContent = f[2] === null ? '—' : f[2];
