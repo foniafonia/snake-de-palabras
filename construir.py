@@ -103,8 +103,13 @@ cambia("  var pool = BANCO.filter(function (p) { return !usados[p.w] && (cumple(
        "  var BJ = BANCO_JUEGO();\n"
        "  var pool = BJ.filter(function (p) { return !usados[p.w] && (cumple(p) === ok); });\n"
        "  if (!pool.length) pool = BJ.filter(function (p) { return cumple(p) === ok && !S.tokens.some(function (t) { return t.p.w === p.w; }); });")
+# --- voz por el motor de audio que ya se desbloquea al tocar (móviles que bloquean los audios que arrancan solos) ---
+cambia("function dicePalabra(w) {", "function dicePalabraVieja(w) {")
+cambia("if (actx.state === 'suspended' && actx.resume) actx.resume(); } catch (e) { actx = null; } }",
+       "if ((actx.state === 'suspended' || actx.state === 'interrupted') && actx.resume) actx.resume();\n"
+       "    if (!actx.abierto) { actx.abierto = 1; var b0 = actx.createBuffer(1, 1, 22050), z0 = actx.createBufferSource(); z0.buffer = b0; z0.connect(actx.destination); z0.start(0); } } catch (e) { actx = null; } }")
 cambia("/* ====================== mover ====================== */", (AQUI / 'ampliacion-juego.js').read_text(encoding='utf-8') + "/* ====================== mover ====================== */")
-cambia("  celdas = Math.min(celdas, COLS - 2);\n", "  celdas = Math.min(celdas, COLS - 2);\n  if (audioOn()) celdas = 2;\n")
+cambia("  celdas = Math.min(celdas, COLS - 2);\n", "  celdas = Math.min(celdas, COLS - 2);\n  if (audioOn()) { celdas = 2; precargaVoz(p.w); }\n")
 cambia("  cx.save(); cx.translate(x0 + w / 2, y0 + h / 2 + bob); cx.scale(esc, esc);",
        "  var hab = audioOn() && oyendo === t, apag = audioOn() && oyendo && oyendo !== t;\n"
        "  if (hab) esc *= REDUCE ? 1.15 : 1.15 + 0.05 * Math.sin(hora / 110);\n"

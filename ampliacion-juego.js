@@ -63,15 +63,53 @@ function cuenta(e) {
   return n;
 }
 
+/* ---------- la voz, por el motor de audio ----------
+   Los móviles (sobre todo Safari) dejan sonar un audio nuevo solo si lo arranca un toque; los sonidos que
+   salen de un temporizador, como los del modo oído, se rechazan tras los primeros (el dibujo seguía, sin voz).
+   El juego ya desbloquea el motor de audio (actx) al tocar: la voz se decodifica una vez y suena por ahí.
+   Si el motor no está listo, se usa el elemento de audio de siempre. */
+var VOCES = {}, fuenteVoz = null, finVoz = null, vozN = 0;
+function sueltaVoz() { var f = finVoz; finVoz = null; if (f) { try { f(); } catch (e) { } } }
+function vozHtml(url) {
+  try { if (audioPalabra) audioPalabra.pause(); audioPalabra = new Audio(url); audioPalabra.onended = sueltaVoz; var p = audioPalabra.play(); if (p && p.catch) p.catch(function () { }); } catch (e) { }
+}
+function vozUrl(w) { return 'snake-voz/' + window.VOZ_SNAKE[w] + '.mp3'; }
+function motorListo() { return !!(actx && actx.state === 'running' && window.fetch && actx.decodeAudioData); }
+function cargaVoz(w, alTener, alFallar) {
+  if (VOCES[w]) { alTener(VOCES[w]); return; }
+  try {
+    fetch(vozUrl(w)).then(function (r) { return r.arrayBuffer(); }).then(function (ab) {
+      actx.decodeAudioData(ab, function (b) { VOCES[w] = b; alTener(b); }, function () { if (alFallar) alFallar(); });
+    }).catch(function () { if (alFallar) alFallar(); });
+  } catch (e) { if (alFallar) alFallar(); }
+}
+function precargaVoz(w) { if (window.VOZ_SNAKE && window.VOZ_SNAKE[w] && !VOCES[w] && motorListo()) cargaVoz(w, function () { }, null); }
+function dicePalabra(w) {
+  if (!sonido || !window.VOZ_SNAKE || !window.VOZ_SNAKE[w]) return;
+  audioListo();
+  if (!motorListo()) { vozHtml(vozUrl(w)); return; }
+  var mi = ++vozN;
+  cargaVoz(w, function (buf) {
+    if (mi !== vozN) return;
+    try {
+      if (fuenteVoz) { fuenteVoz.onended = null; try { fuenteVoz.stop(); } catch (e) { } }
+      if (audioPalabra) { try { audioPalabra.pause(); } catch (e) { } }
+      var f = actx.createBufferSource(); f.buffer = buf; f.connect(actx.destination);
+      f.onended = function () { if (fuenteVoz === f) { fuenteVoz = null; sueltaVoz(); } };
+      fuenteVoz = f; f.start(0);
+    } catch (e) { vozHtml(vozUrl(w)); }
+  }, function () { if (mi === vozN) vozHtml(vozUrl(w)); });
+}
+
 /* ---------- modo oído ---------- */
 var oyendo = null, ultSuena = 0;
 function distToro(a, b) { var dx = Math.abs(a.x - b.x), dy = Math.abs(a.y - b.y); return Math.min(dx, COLS - dx) + Math.min(dy, ROWS - dy); }
 function suenaFicha(t) {
   if (!t) return;
   t.suena = Date.now(); t.oido = t.suena; ultSuena = t.suena; oyendo = t;
-  dicePalabra(t.p.w);
   var libera = function () { if (oyendo === t) { oyendo = null; ultSuena = Date.now(); } };
-  try { if (audioPalabra) audioPalabra.onended = libera; } catch (e) { }
+  finVoz = libera;
+  dicePalabra(t.p.w);
   setTimeout(libera, 2200);
 }
 function fichaCercana() {

@@ -47,7 +47,7 @@ let m, n = 0;
 while ((m = re.exec(html))) {
   let codigo = m[1] ? fs.readFileSync(path.join(dir, m[1]), 'utf8') : m[2];
   if (codigo.indexOf('window.__snake = {') >= 0) {
-    codigo = codigo.replace('window.__snake = {', 'window.__snake = { _S: function () { return S; }, _rellena: rellena, _nuevaPartida: nuevaPartida, _paso: paso, _turno: turnoOido, _directa: directa, _conocidas: todasConocidas, _palabraNueva: palabraNueva, _cumple: cumple, _reglaHtml: reglaHtml, _audioOn: audioOn, _juego: BANCO_JUEGO, _setJugando: function (v) { jugando = v; }, _dibujaToken: dibujaToken,');
+    codigo = codigo.replace('window.__snake = {', 'window.__snake = { _S: function () { return S; }, _rellena: rellena, _nuevaPartida: nuevaPartida, _paso: paso, _turno: turnoOido, _directa: directa, _conocidas: todasConocidas, _palabraNueva: palabraNueva, _cumple: cumple, _reglaHtml: reglaHtml, _audioOn: audioOn, _juego: BANCO_JUEGO, _setJugando: function (v) { jugando = v; }, _dibujaToken: dibujaToken, _decide: decide, _oyendo: function () { return oyendo; }, _ultSuena: function () { return ultSuena; }, _sonido: function () { return sonido; },');
   }
   try { vm.runInContext(codigo, ctx, { filename: m[1] || ('inline' + n) }); } catch (e) { console.log('ERROR en', m[1] || ('inline' + n), '→', e && e.stack ? e.stack.split('\n').slice(0, 4).join('\n') : e); process.exitCode = 1; }
   n++;
