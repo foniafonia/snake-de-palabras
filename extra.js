@@ -109,9 +109,9 @@
   function ponPropias(lista) {
     /* fuera las de antes, dentro las nuevas (las que el banco ya tiene no se repiten) */
     for (var k = G.BANCO.length - 1; k >= 0; k--) if (G.BANCO[k].propia) G.BANCO.splice(k, 1);
-    var ya = {}; G.BANCO.forEach(function (p) { ya[p.w] = 1; });
+    var ya = {}; G.BANCO.forEach(function (p) { p.suya = false; ya[p.w] = p; });
     PROPIAS = lista.slice();
-    lista.forEach(function (w) { if (!ya[w]) G.BANCO.push({ w: w, n: silabas(w), k: norm(w), propia: true }); });
+    lista.forEach(function (w) { if (!ya[w]) G.BANCO.push({ w: w, n: silabas(w), k: norm(w), propia: true }); else ya[w].suya = true; });
   }
   ponPropias(limpiaLista(QS.get('extra')));
 
@@ -120,6 +120,8 @@
   if (!FIJADO) { velo('vInicio', false); velo('vPortada', true); }
   $('pJugar').onclick = function () { velo('vPortada', false); G.muestraInicio(); };
   $('pPrepara').onclick = function () { abrePrepara(); };
+  $('pOido').onclick = function () { E.audio = true; E.regla = 'empieza'; E.letra = 'b'; abrePrepara(); };
+  (function () { var op = document.createElement('option'); op.value = 'conocidas'; op.textContent = 'Solo con las letras que conoce'; $('aRegla').appendChild(op); })();
 
   /* ---------- prepara la partida ---------- */
   var OBJ = [
@@ -134,55 +136,92 @@
     ['l', 'Ele', 'luna, leche, libro…', 'empieza', 'l'],
     ['s2', 'Palabras de 2 sílabas', 'contar golpes de voz', 'silabas', '', 2],
     ['s3', 'Palabras de 3 sílabas', 'contar golpes de voz', 'silabas', '', 3],
+    ['conoce', 'Las letras que ya conoce', 'tú eliges cuáles: a, m, e, o, s, p, n…', 'conocidas', ''],
+    ['oido', 'A oído: b/d, p/t, s/z…', 'la serpiente busca audios, no palabras', 'empieza', 'b', 0, 'audio'],
+    ['larga', 'Palabras largas', '3 o más sílabas', 'larga', ''],
+    ['trabada', 'Sílabas trabadas', 'pla, tre, bra…', 'trabada', ''],
+    ['parecida', 'Palabras que se parecen', 'solo vale la que se pide', 'parecida', ''],
+    ['espejo', 'Espejo dentro de la palabra', 'b/d y p/q, solo vale la pedida', 'espejo', ''],
+    ['real', '¿Existe o es inventada?', 'palabra real frente a inventada', 'real', ''],
+    ['ortografia', '¿Bien escrita?', 'b/v, ll/y, h, s/z', 'ortografia', ''],
     ['todas', 'Leer y comer todas', 'solo lectura, sin intrusas', 'todas', '']
   ];
+  var SIMBOLOS = 'a b c ch d e f g h i j k l ll m n ñ o p q r rr s t u v w x y z'.split(' ');
+  var GENERADAS = ['parecida', 'espejo', 'real', 'ortografia'], OIDO_OK = ['empieza', 'contiene', 'termina', 'silabas', 'todas', 'larga', 'trabada'];
   var LETRAS = 'a b c d e f g h j l m n ñ p q r rr s t v z ch ll'.split(' ');
-  var E = { regla: O.regla, letra: O.letra, silabas: O.silabas, meta: O.meta, nivel: O.nivel || 0, velocidad: O.velocidad === 'lenta' ? 'lenta' : '' };
+  var E = { regla: O.regla, letra: O.letra, silabas: O.silabas, meta: O.meta, nivel: O.nivel || 0, velocidad: O.velocidad === 'lenta' ? 'lenta' : '',
+    conoce: O.conoce.slice(), directas: !!O.directas, soloPropias: !!O.soloPropias, audio: !!O.audio };
   function reglaDe(e) {
     var L = String(e.letra).toUpperCase();
-    if (e.regla === 'empieza') return 'las que EMPIEZAN por ' + L;
-    if (e.regla === 'contiene') return 'las que CONTIENEN ' + L;
-    if (e.regla === 'termina') return 'las que TERMINAN en ' + L;
-    if (e.regla === 'silabas') return e.silabas >= 4 ? 'las de 4 o más sílabas' : 'las de ' + e.silabas + ' sílaba' + (e.silabas === 1 ? '' : 's');
-    return 'todas las palabras';
+    var r;
+    if (e.regla === 'empieza') r = 'las que EMPIEZAN por ' + L;
+    else if (e.regla === 'contiene') r = 'las que CONTIENEN ' + L;
+    else if (e.regla === 'termina') r = 'las que TERMINAN en ' + L;
+    else if (e.regla === 'silabas') r = e.silabas >= 4 ? 'las de 4 o más sílabas' : 'las de ' + e.silabas + ' sílaba' + (e.silabas === 1 ? '' : 's');
+    else if (e.regla === 'conocidas') r = 'las que se leen con ' + e.conoce.join(' ');
+    else if (e.regla === 'larga') r = 'las de 3 o más sílabas';
+    else if (e.regla === 'trabada') r = 'las que tienen sílaba trabada (pla, tre, bra…)';
+    else if (e.regla === 'parecida') r = 'la palabra que se pide entre otras que se le parecen';
+    else if (e.regla === 'espejo') r = 'la palabra que se pide entre otras con b/d o p/q cambiadas';
+    else if (e.regla === 'real') r = 'las que existen (no las inventadas)';
+    else if (e.regla === 'ortografia') r = 'las bien escritas';
+    else r = 'todas las palabras';
+    if (e.directas && GENERADAS.indexOf(e.regla) < 0) r += ', solo con sílabas directas';
+    if (e.soloPropias && GENERADAS.indexOf(e.regla) < 0) r += ', solo de tus palabras';
+    if (e.audio && OIDO_OK.indexOf(e.regla) >= 0) r += ', escuchando (a oído)';
+    return r;
   }
-  function cuantasHay(e) {
-    var l = norm(e.letra), n = 0;
-    G.BANCO.forEach(function (p) {
-      var k = p.k, v = e.regla === 'empieza' ? k.indexOf(l) === 0 : e.regla === 'contiene' ? k.indexOf(l) >= 0 :
-        e.regla === 'termina' ? (k.length >= l.length && k.lastIndexOf(l) === k.length - l.length) :
-          e.regla === 'silabas' ? (e.silabas >= 4 ? p.n >= 4 : p.n === e.silabas) : true;
-      if (v) n++;
+  function cuantasHay(e) { return G.cuenta(e); }
+  function pintaConoce() {
+    var c = $('prConoce'); c.innerHTML = '';
+    SIMBOLOS.forEach(function (l) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = l; var on = E.conoce.indexOf(l) >= 0; b.className = on ? 'on' : ''; b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.onclick = function () { var k = E.conoce.indexOf(l); if (k >= 0) E.conoce.splice(k, 1); else E.conoce.push(l); pintaPrepara(); };
+      c.appendChild(b);
     });
-    return n;
   }
   function pintaPrepara() {
     var c = $('prObjs'); c.innerHTML = '';
+    if (GENERADAS.indexOf(E.regla) >= 0 || OIDO_OK.indexOf(E.regla) < 0) E.audio = E.audio && OIDO_OK.indexOf(E.regla) >= 0;
     OBJ.forEach(function (o) {
       var b = document.createElement('button'); b.type = 'button';
-      var on = o[3] === E.regla && (o[3] === 'silabas' ? o[5] === E.silabas : (o[3] === 'todas' || o[4] === E.letra));
+      var on = o[3] === E.regla && (o[3] === 'silabas' ? o[5] === E.silabas : (['todas', 'conocidas', 'larga', 'trabada', 'parecida', 'espejo', 'real', 'ortografia'].indexOf(o[3]) >= 0 || o[4] === E.letra)) && !!o[6] === !!E.audio;
       b.className = on ? 'on' : '';
       b.appendChild(document.createTextNode(o[1]));
       var s = document.createElement('small'); s.textContent = o[2]; b.appendChild(s);
-      b.onclick = function () { E.regla = o[3]; if (o[4]) E.letra = o[4]; if (o[5]) E.silabas = o[5]; pintaPrepara(); };
+      b.onclick = function () { E.regla = o[3]; if (o[4]) E.letra = o[4]; if (o[5]) E.silabas = o[5]; E.audio = !!o[6]; pintaPrepara(); };
       c.appendChild(b);
     });
     $('prRegla').value = E.regla; $('prSil').value = String(E.silabas); $('prMeta').value = String(E.meta);
     $('prNivel').value = E.nivel ? String(E.nivel) : 'auto'; $('prVel').value = E.velocidad;
     var sl = $('prLetra'); if (!sl.options.length) LETRAS.forEach(function (l) { var op = document.createElement('option'); op.value = l; op.textContent = l.toUpperCase(); sl.appendChild(op); });
     sl.value = E.letra;
-    $('prCLetra').style.display = (E.regla === 'silabas' || E.regla === 'todas') ? 'none' : '';
+    var conLetra = ['empieza', 'contiene', 'termina'].indexOf(E.regla) >= 0;
+    $('prCLetra').style.display = conLetra ? '' : 'none';
     $('prCSil').style.display = E.regla === 'silabas' ? '' : 'none';
-    var n = cuantasHay(E);
-    $('prResumen').textContent = (E.regla === 'todas' ? 'La serpiente come todas las palabras' : 'La serpiente come solo ' + reglaDe(E)) + ' · tandas de ' + E.meta +
-      (E.regla === 'todas' ? '' : ' · ' + n + ' palabra' + (n === 1 ? '' : 's') + ' que valen' + (n < 4 ? ' (pocas: añade palabras tuyas o cambia la regla)' : ''));
+    $('prCConoce').style.display = E.regla === 'conocidas' ? '' : 'none';
+    if (E.regla === 'conocidas') pintaConoce();
+    var generada = GENERADAS.indexOf(E.regla) >= 0, oidoPosible = OIDO_OK.indexOf(E.regla) >= 0;
+    $('prDirectas').checked = !!E.directas; $('prDirectas').disabled = generada;
+    $('prSolo').checked = !!E.soloPropias; $('prSolo').disabled = generada;
+    $('prAudio').checked = !!E.audio && oidoPosible; $('prAudio').disabled = !oidoPosible;
+    $('prAudioNota').textContent = oidoPosible ? '' : 'El modo oído no vale con esta regla: se juzga mirando cómo está escrita la palabra.';
+    var n = generada ? -1 : cuantasHay(E), ent = reglaDe(E);
+    var texto = (E.regla === 'todas' ? 'La serpiente come todas las palabras' : 'La serpiente come solo ' + ent) + ' · tandas de ' + E.meta;
+    if (E.regla === 'todas' && (E.directas || E.soloPropias || E.audio)) texto = 'La serpiente come todas las palabras que cumplen: ' + ent.replace(/^todas las palabras, ?/, '') + ' · tandas de ' + E.meta;
+    if (generada) texto += ' · el juego fabrica las palabras que se parecen, no hace falta nada más';
+    else if (E.regla !== 'todas' || E.directas || E.soloPropias || E.audio) texto += ' · ' + n + ' palabra' + (n === 1 ? '' : 's') + ' que valen' + (n < 4 ? ' (pocas: añade palabras tuyas o cambia la regla)' : '');
+    if (E.soloPropias && !PROPIAS.length) texto += ' · escribe tus palabras en el paso 3';
+    if (E.audio && oidoPosible) texto += ' · solo suenan las que tienen voz (las tuyas no)';
+    $('prResumen').textContent = texto;
     $('prEnlace').className = 'enlace';
   }
   function leeFormulario() {
     E.regla = $('prRegla').value; E.letra = $('prLetra').value; E.silabas = parseInt($('prSil').value, 10);
     E.meta = parseInt($('prMeta').value, 10); E.nivel = $('prNivel').value === 'auto' ? 0 : parseInt($('prNivel').value, 10); E.velocidad = $('prVel').value;
+    E.directas = $('prDirectas').checked; E.soloPropias = $('prSolo').checked; E.audio = $('prAudio').checked;
   }
-  ['prRegla', 'prLetra', 'prSil', 'prMeta', 'prNivel', 'prVel'].forEach(function (id) { $(id).onchange = function () { leeFormulario(); pintaPrepara(); }; });
+  ['prRegla', 'prLetra', 'prSil', 'prMeta', 'prNivel', 'prVel', 'prDirectas', 'prSolo', 'prAudio'].forEach(function (id) { $(id).onchange = function () { leeFormulario(); pintaPrepara(); }; });
   $('prPropias').onchange = function () { ponPropias(limpiaLista($('prPropias').value)); pintaPrepara(); };
   function abrePrepara() {
     velo('vPortada', false); velo('vInicio', false); velo('vFin', false);
@@ -192,14 +231,26 @@
   function aplica() {
     leeFormulario(); ponPropias(limpiaLista($('prPropias').value));
     O.regla = E.regla; O.letra = E.letra; O.silabas = E.silabas; O.meta = E.meta; O.nivel = E.nivel; O.velocidad = E.velocidad || null;
-    try { localStorage.setItem('fonia-snake-opc', JSON.stringify({ regla: O.regla, letra: O.letra, silabas: O.silabas, meta: O.meta, nivel: O.nivel })); } catch (e) { }
+    O.conoce = E.conoce.length ? E.conoce.slice() : ['a', 'm', 'e', 'o', 's', 'p', 'n']; O.directas = !!E.directas && GENERADAS.indexOf(E.regla) < 0; O.soloPropias = !!E.soloPropias && GENERADAS.indexOf(E.regla) < 0; O.audio = !!E.audio && OIDO_OK.indexOf(E.regla) >= 0;
+    G.sinMundos();
+    try { if (['conocidas', 'parecida', 'espejo', 'real', 'ortografia'].indexOf(O.regla) < 0) localStorage.setItem('fonia-snake-opc', JSON.stringify({ regla: O.regla, letra: O.letra, silabas: O.silabas, meta: O.meta, nivel: O.nivel })); } catch (e) { }
   }
-  $('prJugar').onclick = function () { aplica(); velo('vPrepara', false); G.hud(); G.muestraInicio(); suma('snake_partida_preparada'); };
+  $('prJugar').onclick = function () {
+    aplica(); velo('vPrepara', false); G.hud(); G.muestraInicio(); suma('snake_partida_preparada');
+    if (O.audio && G.OPC.regla !== 'parecida') suma('snake_modo_oido');
+    if (O.regla === 'conocidas') suma('snake_modo_conocidas');
+    if (O.directas) suma('snake_modo_directas');
+    if (O.soloPropias) suma('snake_modo_solo_propias');
+  };
   $('prVolver').onclick = function () { velo('vPrepara', false); velo('vPortada', true); };
   function enlaceFamilia() {
     var p = ['filtro=' + E.regla];
-    if (E.regla !== 'silabas' && E.regla !== 'todas') p.push('letra=' + encodeURIComponent(E.letra));
+    if (['empieza', 'contiene', 'termina'].indexOf(E.regla) >= 0) p.push('letra=' + encodeURIComponent(E.letra));
     if (E.regla === 'silabas') p.push('silabas=' + E.silabas);
+    if (E.regla === 'conocidas') p.push('conoce=' + encodeURIComponent(E.conoce.join(',')));
+    if (E.directas && GENERADAS.indexOf(E.regla) < 0) p.push('directas=1');
+    if (E.soloPropias && GENERADAS.indexOf(E.regla) < 0) p.push('solo=1');
+    if (E.audio && OIDO_OK.indexOf(E.regla) >= 0) p.push('modo=audio');
     p.push('meta=' + E.meta);
     if (E.nivel) p.push('nivel=' + E.nivel);
     if (E.velocidad) p.push('velocidad=' + E.velocidad);

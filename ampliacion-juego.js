@@ -1,0 +1,94 @@
+/* ====================== ColmenIA · lo que han pedido en la comunidad (25/10/2026) ======================
+   1 · «Letras que ya conoce»: la serpiente come solo palabras que se leen con las letras que el niño sabe
+       (petición de Mai: a, m, e, o, s, p, n). Regla nueva: conocidas.
+   2 · «Solo sílabas directas» (ma, pe, si, so, mu…, sin trabadas ni sílabas cerradas): filtro que vale
+       para cualquier regla. Responde a «conoce la m y la a pero no dice ma».
+   3 · «Solo mis palabras»: el banco se reduce a las que ha escrito la logopeda.
+   4 · Modo oído: la serpiente busca audios, no palabras escritas (Raquel: discriminación auditiva, b/d).
+       Cada ficha es un altavoz; suena por turnos y cuando la cabeza se acerca; 🎧 la repite.
+       Solo con palabras que tienen voz y con reglas que se juzgan por el sonido. */
+function simbolosDe(w) {
+  var s = String(w).toLowerCase().replace(/[áàä]/g, 'a').replace(/[éèë]/g, 'e').replace(/[íìï]/g, 'i').replace(/[óòö]/g, 'o').replace(/[úùü]/g, 'u'), sal = [], i = 0, d;
+  while (i < s.length) {
+    d = s.substr(i, 2);
+    if (d === 'ch' || d === 'll' || d === 'rr') { sal.push(d); i += 2; } else { sal.push(s.charAt(i)); i++; }
+  }
+  return sal;
+}
+var CONOCE_CLAVE = '', CONOCE_MAPA = {};
+function conoceMapa() {
+  var k = OPC.conoce.join(',');
+  if (k !== CONOCE_CLAVE) { CONOCE_CLAVE = k; CONOCE_MAPA = {}; OPC.conoce.forEach(function (x) { CONOCE_MAPA[x] = 1; }); }
+  return CONOCE_MAPA;
+}
+function primeraDesconocida(w) {
+  var m = conoceMapa(), s = simbolosDe(w);
+  for (var i = 0; i < s.length; i++) if (!m[s[i]]) return s[i];
+  return '';
+}
+function todasConocidas(w) { return primeraDesconocida(w) === ''; }
+function directa(w) {
+  var s = String(w).toLowerCase().replace(/[áàä]/g, 'a').replace(/[éèë]/g, 'e').replace(/[íìï]/g, 'i').replace(/[óòö]/g, 'o').replace(/[úùü]/g, 'u')
+    .replace(/ch|ll|rr|qu/g, 'x').replace(/gu(?=[ei])/g, 'x');
+  return /^(?:[bcdfghjklmnñpqrstvwxyz]?[aeiou])+$/.test(s) && !/[aeiou]{2}/.test(s);
+}
+function conVoz(w) { return !!(window.VOZ_SNAKE && window.VOZ_SNAKE[w]); }
+function audioOn() { return !!OPC.audio && ['empieza', 'contiene', 'termina', 'silabas', 'todas', 'larga', 'trabada'].indexOf(OPC.regla) >= 0; }
+function BANCO_JUEGO(estricto) {
+  var oido = audioOn();
+  var l = BANCO.filter(function (p) {
+    if (oido && !conVoz(p.w)) return false;
+    if (OPC.soloPropias && !(p.propia || p.suya)) return false;
+    if (OPC.directas && !directa(p.w)) return false;
+    return true;
+  });
+  return (l.length || estricto) ? l : BANCO;
+}
+function sufijoRegla() {
+  var s = '';
+  if (OPC.directas) s += ' · solo <b>sílabas directas</b>';
+  if (OPC.soloPropias) s += ' · tus palabras';
+  if (audioOn()) s += ' · 🎧 <b>a oído</b>';
+  return s;
+}
+function cuenta(e) {
+  var g = { regla: OPC.regla, letra: OPC.letra, silabas: OPC.silabas, conoce: OPC.conoce, directas: OPC.directas, soloPropias: OPC.soloPropias, audio: OPC.audio };
+  var n = -1;
+  try {
+    OPC.regla = e.regla; OPC.letra = e.letra || OPC.letra; OPC.silabas = e.silabas || OPC.silabas; OPC.conoce = e.conoce && e.conoce.length ? e.conoce : OPC.conoce;
+    OPC.directas = !!e.directas; OPC.soloPropias = !!e.soloPropias; OPC.audio = !!e.audio;
+    if (!GENERADA[OPC.regla]) n = BANCO_JUEGO(true).filter(cumple).length;
+  } catch (x) { }
+  OPC.regla = g.regla; OPC.letra = g.letra; OPC.silabas = g.silabas; OPC.conoce = g.conoce; OPC.directas = g.directas; OPC.soloPropias = g.soloPropias; OPC.audio = g.audio;
+  return n;
+}
+
+/* ---------- modo oído ---------- */
+var oyendo = null, ultSuena = 0;
+function distToro(a, b) { var dx = Math.abs(a.x - b.x), dy = Math.abs(a.y - b.y); return Math.min(dx, COLS - dx) + Math.min(dy, ROWS - dy); }
+function suenaFicha(t) {
+  if (!t) return;
+  t.suena = Date.now(); t.oido = t.suena; ultSuena = t.suena; oyendo = t;
+  dicePalabra(t.p.w);
+  setTimeout(function () { if (oyendo === t) oyendo = null; }, 1200);
+}
+function fichaCercana() {
+  var h = S.snake[0], mejor = null, dm = 99, k, t, d;
+  for (k = 0; k < S.tokens.length; k++) {
+    t = S.tokens[k];
+    d = Math.min(distToro(h, t.cells[0]), distToro(h, t.cells[t.cells.length - 1]));
+    if (d < dm) { dm = d; mejor = t; }
+  }
+  return { t: mejor, d: dm };
+}
+function turnoOido() {
+  if (!S || !jugando || pausado || !S.tokens.length || !audioOn()) return;
+  var ahora = Date.now(), c = fichaCercana(), k, t, viejo = null;
+  if (ahora - ultSuena < 1400) return;
+  if (c.t && c.d <= 3 && ahora - (c.t.oido || 0) > 4500) { suenaFicha(c.t); return; }
+  if (ahora - ultSuena < 2600) return;
+  for (k = 0; k < S.tokens.length; k++) { t = S.tokens[k]; if (!viejo || (t.oido || 0) < (viejo.oido || 0)) viejo = t; }
+  suenaFicha(viejo);
+}
+$('bOir').onclick = function () { if (S && S.tokens.length && audioOn()) { var c = fichaCercana(); if (c.t) { if (!sonido) { sonido = true; $('bSonido').textContent = '🔊'; } suenaFicha(c.t); } } };
+

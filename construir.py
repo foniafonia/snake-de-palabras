@@ -52,6 +52,12 @@ cambia('<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegib
 cambia('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n', '')
 cambia('<style>', '<style>\n' + (AQUI / 'fuentes/fuentes.css').read_text(encoding='utf-8'))
 
+# --- piezas comunes de Fönia que el juego carga desde fuera: se traen al repositorio ---
+# (guardan solo en este aparato: localStorage; no envían nada a ningún sitio)
+for pieza in ('estrellas-mundos.js', 'graduacion.js'):
+    cambia('<script src="../%s"></script>' % pieza, '<script src="%s"></script>' % pieza)
+    shutil.copyfile(ORIGEN / pieza, AQUI / pieza)
+
 # --- fuera el gabinete ---
 cambia('<script src="../pauta-familia.js"></script>\n', '')
 cambia('<script src="/bichito-revision.js"></script>\n', '')
@@ -68,7 +74,53 @@ cambia('@media (max-width:640px){#regla .etq{display:none}',
        '@media (max-width:640px){#hud{flex-wrap:wrap}#regla{flex:1 0 100%;justify-content:center;margin-bottom:6px}#regla .chip{white-space:normal;text-align:center}#regla .etq{display:none}')
 
 # --- el juego deja a mano lo que necesita extra.js ---
-cambia("window.__snake = { OPC: OPC,", "window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, OPC: OPC,")
+cambia("window.__snake = { OPC: OPC,", "window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, OPC: OPC, cuenta: cuenta, voz: conVoz,\n"
+       "  sinMundos: function () { MUNDOS = null; $('inicioMundos').innerHTML = ''; },")
+
+
+# --- peticiones de la comunidad (25/10/2026): letras que conoce, sílabas directas, solo mis palabras y modo oído ---
+cambia("var FIJADO = ['empieza', 'contiene', 'termina', 'silabas', 'todas', 'larga', 'trabada', 'parecida', 'espejo', 'real', 'ortografia'].indexOf(QS.get('filtro')) >= 0;",
+       "var FIJADO = ['empieza', 'contiene', 'termina', 'silabas', 'todas', 'larga', 'trabada', 'parecida', 'espejo', 'real', 'ortografia', 'conocidas'].indexOf(QS.get('filtro')) >= 0;")
+cambia("  velocidad: QS.get('velocidad')\n};",
+       "  velocidad: QS.get('velocidad'),\n"
+       "  conoce: parseConoce(QS.get('conoce')), directas: QS.get('directas') === '1', soloPropias: QS.get('solo') === '1', audio: QS.get('modo') === 'audio'\n};\n"
+       "function parseConoce(txt) {\n"
+       "  var ok = 'a b c ch d e f g h i j k l ll m n ñ o p q r rr s t u v w x y z'.split(' '), sal = [], vistos = {};\n"
+       "  String(txt || '').toLowerCase().split(/[\\s,;.]+/).forEach(function (x) { if (ok.indexOf(x) >= 0 && !vistos[x]) { vistos[x] = 1; sal.push(x); } });\n"
+       "  return sal.length ? sal : ['a', 'm', 'e', 'o', 's', 'p', 'n'];\n}")
+cambia("    case 'larga': return p.n >= 3;\n", "    case 'conocidas': return todasConocidas(p.w);\n    case 'larga': return p.n >= 3;\n")
+cambia("function reglaHtml() {\n  var L = OPC.letra.toUpperCase(), r = OPC.regla;\n",
+       "function reglaHtml() { return reglaHtml0() + sufijoRegla(); }\n"
+       "function reglaHtml0() {\n  var L = OPC.letra.toUpperCase(), r = OPC.regla;\n"
+       "  if (r === 'conocidas') return 'las que se leen con <b>' + OPC.conoce.slice(0, 8).join(' ') + (OPC.conoce.length > 8 ? '…' : '') + '</b>';\n")
+cambia("  if (r === 'larga') return 'tiene ' + p.n + ' sílaba' + (p.n === 1 ? '' : 's');\n",
+       "  if (r === 'larga') return 'tiene ' + p.n + ' sílaba' + (p.n === 1 ? '' : 's');\n"
+       "  if (r === 'conocidas') return 'lleva la «' + primeraDesconocida(p.w) + '», que aún no conoce';\n")
+cambia("  if (r === 'larga') return p.n + ' sílabas';\n", "  if (r === 'larga') return p.n + ' sílabas';\n  if (r === 'conocidas') return 'solo letras que conoce';\n")
+cambia("  var n = BANCO.filter(cumple).length;", "  var n = BANCO_JUEGO().filter(cumple).length;")
+cambia("  var pool = BANCO.filter(function (p) { return !usados[p.w] && (cumple(p) === ok); });\n"
+       "  if (!pool.length) pool = BANCO.filter(function (p) { return cumple(p) === ok && !S.tokens.some(function (t) { return t.p.w === p.w; }); });",
+       "  var BJ = BANCO_JUEGO();\n"
+       "  var pool = BJ.filter(function (p) { return !usados[p.w] && (cumple(p) === ok); });\n"
+       "  if (!pool.length) pool = BJ.filter(function (p) { return cumple(p) === ok && !S.tokens.some(function (t) { return t.p.w === p.w; }); });")
+cambia("/* ====================== mover ====================== */", (AQUI / 'ampliacion-juego.js').read_text(encoding='utf-8') + "/* ====================== mover ====================== */")
+cambia("  celdas = Math.min(celdas, COLS - 2);\n", "  celdas = Math.min(celdas, COLS - 2);\n  if (audioOn()) celdas = 2;\n")
+cambia("  cx.fillText(t.p.w, w / 2, h / 2 + 1);\n  cx.restore();",
+       "  if (audioOn()) {\n"
+       "    var suena = (Date.now() - (t.suena || 0)) < 1200;\n"
+       "    if (suena) { cx.fillStyle = '#FFF0B3'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill(); cx.strokeStyle = t.color; cx.lineWidth = Math.max(3, CELL * 0.08); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke(); }\n"
+       "    cx.fillStyle = '#10231A'; cx.font = Math.round(CELL * (suena ? 0.74 : 0.66)) + 'px Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,system-ui,sans-serif'; cx.fillText(suena ? '🔊' : '🔈', w / 2, h / 2 + 1);\n"
+       "  } else cx.fillText(t.p.w, w / 2, h / 2 + 1);\n  cx.restore();")
+cambia("  avanzaEfectos(dt); dibuja(alfa);", "  turnoOido(); avanzaEfectos(dt); dibuja(alfa);")
+cambia("    nuevaPartida(); jugando = true; pausado = false;",
+       "    if (audioOn() && !sonido) { sonido = true; $('bSonido').textContent = '🔊'; }\n    nuevaPartida(); jugando = true; pausado = false;")
+cambia("  $('chipRegla').innerHTML = reglaHtml();", "  $('chipRegla').innerHTML = reglaHtml(); $('bOir').style.display = audioOn() ? '' : 'none';")
+cambia('    <button class="bt" id="bSonido" type="button" aria-label="Sonido" title="Sonido">🔊</button>',
+       '    <button class="bt" id="bOir" type="button" aria-label="Oír otra vez" title="Oír otra vez" style="display:none">🎧</button>\n'
+       '    <button class="bt" id="bSonido" type="button" aria-label="Sonido" title="Sonido">🔊</button>')
+cambia('<div><i>🔎</i>Lee las palabras del tablero</div>', '<div><i>🔎</i><span id="pasoLee">Lee las palabras del tablero</span></div>')
+cambia("  $('inicioRegla').innerHTML =", "  $('pasoLee').textContent = audioOn() ? 'Escucha las fichas: cada una suena' : 'Lee las palabras del tablero';\n  $('inicioRegla').innerHTML =")
+cambia("a.textContent = S && jugando ? 'Lee bien antes de comer' : '';", "a.textContent = S && jugando ? (audioOn() ? 'Escucha bien antes de comer' : 'Lee bien antes de comer') : '';")
 
 # --- estilos de lo añadido ---
 cambia('</style>', (AQUI / 'extra.css').read_text(encoding='utf-8') + '</style>')
@@ -90,8 +142,9 @@ PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta conportada"
       <p class="lema">La serpiente solo come las palabras que cumplen <b>tu regla</b>. Y al acabar te dice qué letras confunde.</p>
       <button class="btnimg" id="pJugar" type="button" aria-label="Jugar ya"><img class="normal" src="portada/boton-jugar.png" width="720" height="280" alt=""><img class="pulsado" src="portada/boton-jugar-pulsado.png" width="720" height="280" alt=""></button>
       <button class="btn s ancho" id="pPrepara" type="button">🧑‍⚕️ Preparar una partida<small>Elige el objetivo y manda el enlace a la familia</small></button>
+      <button class="btn s ancho" id="pOido" type="button">🎧 Jugar escuchando<small>La serpiente busca audios, no palabras escritas</small></button>
       <ul class="trabaja"><li>Lectura de palabras</li><li>Conciencia fonológica</li><li>Letras que se confunden</li><li>Sílabas</li><li>Atención</li></ul>
-      <p style="font-size:15px;margin:0 0 10px">De 5 a 12 años · móvil, tableta u ordenador · 241 palabras con voz · sin registro</p>
+      <p style="font-size:15px;margin:0 0 10px">De 5 a 12 años · móvil, tableta u ordenador · 317 palabras (241 con voz) · sin registro</p>
       """ + boton('portada', '¿Te ha gustado? Hay más juegos como este', 'En ColmenIA, la comunidad de más de 170 logopedas y maestras que usan la IA en su trabajo.') + """
       """ + idea('idea_portada') + """
       <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>
@@ -105,18 +158,25 @@ PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta conportada"
       <div class="objs" id="prObjs"></div>
       <h2>2 · Ajusta, si quieres</h2>
       <div class="fila2">
-        <div class="campo"><label for="prRegla">Regla</label><select id="prRegla"><option value="empieza">Empiezan por…</option><option value="contiene">Contienen…</option><option value="termina">Terminan en…</option><option value="silabas">Número de sílabas</option><option value="todas">Todas (solo leer)</option></select></div>
+        <div class="campo"><label for="prRegla">Regla</label><select id="prRegla"><option value="empieza">Empiezan por…</option><option value="contiene">Contienen…</option><option value="termina">Terminan en…</option><option value="silabas">Número de sílabas</option><option value="larga">Palabras largas (3+ sílabas)</option><option value="trabada">Con sílaba trabada</option><option value="conocidas">Solo con las letras que conoce</option><option value="parecida">Palabras parecidas (una sola vale)</option><option value="espejo">Letras espejo dentro de la palabra</option><option value="real">Existe o es inventada</option><option value="ortografia">Bien escrita</option><option value="todas">Todas (solo leer)</option></select></div>
         <div class="campo" id="prCLetra"><label for="prLetra">Letra o grupo</label><select id="prLetra"></select></div>
+        <div class="campo" id="prCConoce" style="flex:1 1 100%"><label>Letras que ya conoce (toca las que sabe)</label><div class="letras" id="prConoce"></div></div>
         <div class="campo" id="prCSil"><label for="prSil">Sílabas</label><select id="prSil"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o más</option></select></div>
       </div>
       <div class="fila2">
         <div class="campo"><label for="prMeta">Palabras por tanda</label><select id="prMeta"><option>5</option><option>10</option><option>15</option><option>20</option></select></div>
-        <div class="campo"><label for="prNivel">Dificultad</label><select id="prNivel"><option value="auto">Se adapta sola</option><option value="1">1 · muy tranquila</option><option value="2">2</option><option value="3">3</option><option value="4">4 · rápida</option></select></div>
+        <div class="campo"><label for="prNivel">Dificultad</label><select id="prNivel"><option value="auto">Se adapta sola</option><option value="1">1 · muy tranquila</option><option value="2">2</option><option value="3">3</option><option value="4">4 · rápida</option><option value="5">5 · más rápida</option><option value="6">6 · la más rápida</option></select></div>
         <div class="campo"><label for="prVel">Ritmo</label><select id="prVel"><option value="">Normal</option><option value="lenta">Más lento</option></select></div>
+      </div>
+      <div class="opciones">
+        <label class="op"><input type="checkbox" id="prDirectas"> <span><b>Solo sílabas directas</b> (ma, pe, si, so, mu…; sin trabadas ni sílabas cerradas)</span></label>
+        <label class="op"><input type="checkbox" id="prSolo"> <span><b>Jugar solo con mis palabras</b> (las del paso 3)</span></label>
+        <label class="op"><input type="checkbox" id="prAudio"> <span><b>🎧 A oído:</b> la serpiente busca audios, no palabras escritas</span></label>
+        <p class="nota" id="prAudioNota" style="text-align:left;margin:2px 0 0"></p>
       </div>
       <h2>3 · Palabras de tu paciente (opcional)</h2>
       <textarea id="prPropias" placeholder="Escribe las tuyas separadas por comas: rueda, ratón, arroz…" aria-label="Palabras propias"></textarea>
-      <p class="nota" style="text-align:left">Se suman a las 241 del juego y siguen la misma regla. Sin nombres de personas. Estas no tienen voz y sus sílabas se cuentan de forma aproximada.</p>
+      <p class="nota" style="text-align:left">Se suman a las 317 del juego y siguen la misma regla. Sin nombres de personas. Estas no tienen voz y sus sílabas se cuentan de forma aproximada.</p>
       <div class="resumen" id="prResumen"></div>
       <div style="text-align:center">
         <button class="btn" id="prJugar" type="button">▶ Jugar ahora</button>

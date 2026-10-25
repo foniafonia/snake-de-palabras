@@ -7,7 +7,10 @@ cumple, el juego dice por qué y se sigue jugando: no hay vidas ni muertes.
 **Jugar:** https://foniafonia.github.io/snake-de-palabras/
 
 - La regla se cambia con el botón ⚙️ o desde el enlace:
-  `?filtro=empieza|contiene|termina|silabas|todas&letra=r&silabas=2&meta=10&nivel=1..4`
+  `?filtro=empieza|contiene|termina|silabas|larga|trabada|conocidas|parecida|espejo|real|ortografia|todas&letra=r&silabas=2&meta=10&nivel=1..6`
+- Pedido por la comunidad (25/10/2026): `&conoce=a,m,e,o,s,p,n` (con `filtro=conocidas`: solo palabras que se leen con esas letras),
+  `&directas=1` (solo sílabas directas: ma, pe, si…), `&solo=1` (solo las palabras de `&extra=`) y
+  `&modo=audio` (la serpiente busca audios en vez de palabras escritas; solo con las 241 palabras con voz).
 - Funciona en móvil, tableta y ordenador. Sin registro; los resultados no salen del aparato.
 - Privacidad, en claro: `privacidad.html`. Cuánta gente lo usa: `estadisticas.html`.
 - Es material de apoyo: no sustituye a la logopeda.
@@ -17,7 +20,7 @@ cumple, el juego dice por qué y se sigue jugando: no hay vidas ni muertes.
 
 ## Créditos
 
-- Idea y diseño: José Aserraf. Código, dibujos y banco de 241 palabras: propios.
+- Idea y diseño: José Aserraf. Código, dibujos y banco de 317 palabras (241 con voz): propios.
 - Voz: Piper (Open Home Foundation), modelo `es_ES-sharvard-medium`, licencia CC BY 3.0.
 - Letras: Atkinson Hyperlegible (Braille Institute) y Jost (Owen Earl), SIL Open Font License 1.1, guardadas en `fuentes/`.
 - Ilustración de portada y botón: generados con Codex por encargo.

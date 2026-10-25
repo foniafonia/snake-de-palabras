@@ -166,6 +166,11 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
 @media (prefers-reduced-motion:reduce){.despedida-caja{-webkit-animation:none;animation:none}}
 #vPausa .cta{margin-top:16px}
 .fijado #vPausa .cta{display:none}
+
+.opciones{margin:10px 0 4px;text-align:left}
+.op{display:flex;align-items:flex-start;gap:10px;margin:8px 0;font-size:16px;line-height:1.3;cursor:pointer}
+.op input{width:22px;height:22px;margin-top:1px;flex:none}
+#prConoce button{width:44px}
 </style>
 </head>
 <body>
@@ -174,6 +179,7 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
     <div id="regla"><span class="etq">Come<br>solo…</span><span class="chip" id="chipRegla">…</span></div>
     <div class="dato"><span>Palabras</span><b id="hPunt">0/10</b></div>
     <div class="dato"><span>Racha</span><b class="racha" id="hRacha">0</b></div>
+    <button class="bt" id="bOir" type="button" aria-label="Oír otra vez" title="Oír otra vez" style="display:none">🎧</button>
     <button class="bt" id="bSonido" type="button" aria-label="Sonido" title="Sonido">🔊</button>
     <button class="bt" id="bAjustes" type="button" aria-label="Ajustes de la logopeda" title="Ajustes">⚙️</button>
     <button class="bt" id="bPausa" type="button" aria-label="Pausa" title="Pausa">⏸</button>
@@ -189,8 +195,9 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
       <p class="lema">La serpiente solo come las palabras que cumplen <b>tu regla</b>. Y al acabar te dice qué letras confunde.</p>
       <button class="btnimg" id="pJugar" type="button" aria-label="Jugar ya"><img class="normal" src="portada/boton-jugar.png" width="720" height="280" alt=""><img class="pulsado" src="portada/boton-jugar-pulsado.png" width="720" height="280" alt=""></button>
       <button class="btn s ancho" id="pPrepara" type="button">🧑‍⚕️ Preparar una partida<small>Elige el objetivo y manda el enlace a la familia</small></button>
+      <button class="btn s ancho" id="pOido" type="button">🎧 Jugar escuchando<small>La serpiente busca audios, no palabras escritas</small></button>
       <ul class="trabaja"><li>Lectura de palabras</li><li>Conciencia fonológica</li><li>Letras que se confunden</li><li>Sílabas</li><li>Atención</li></ul>
-      <p style="font-size:15px;margin:0 0 10px">De 5 a 12 años · móvil, tableta u ordenador · 241 palabras con voz · sin registro</p>
+      <p style="font-size:15px;margin:0 0 10px">De 5 a 12 años · móvil, tableta u ordenador · 317 palabras (241 con voz) · sin registro</p>
       <a class="cta" data-skool="portada" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener"><span class="cta-abeja" aria-hidden="true">🐝</span><span class="cta-txt"><b>¿Te ha gustado? Hay más juegos como este</b><span>En ColmenIA, la comunidad de más de 170 logopedas y maestras que usan la IA en su trabajo.</span><span class="cta-lista"><i>🏎️ FonoKart</i><i>🏃 FonoDash</i><i>🐍 y los que van saliendo</i></span></span><span class="cta-ir">Entrar <span aria-hidden="true">→</span></span></a>
       <a class="idea" data-skool="idea_portada" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener">💡 ¿Echas algo en falta o has visto un fallo? Cuéntalo en la comunidad</a>
       <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>
@@ -204,18 +211,25 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
       <div class="objs" id="prObjs"></div>
       <h2>2 · Ajusta, si quieres</h2>
       <div class="fila2">
-        <div class="campo"><label for="prRegla">Regla</label><select id="prRegla"><option value="empieza">Empiezan por…</option><option value="contiene">Contienen…</option><option value="termina">Terminan en…</option><option value="silabas">Número de sílabas</option><option value="todas">Todas (solo leer)</option></select></div>
+        <div class="campo"><label for="prRegla">Regla</label><select id="prRegla"><option value="empieza">Empiezan por…</option><option value="contiene">Contienen…</option><option value="termina">Terminan en…</option><option value="silabas">Número de sílabas</option><option value="larga">Palabras largas (3+ sílabas)</option><option value="trabada">Con sílaba trabada</option><option value="conocidas">Solo con las letras que conoce</option><option value="parecida">Palabras parecidas (una sola vale)</option><option value="espejo">Letras espejo dentro de la palabra</option><option value="real">Existe o es inventada</option><option value="ortografia">Bien escrita</option><option value="todas">Todas (solo leer)</option></select></div>
         <div class="campo" id="prCLetra"><label for="prLetra">Letra o grupo</label><select id="prLetra"></select></div>
+        <div class="campo" id="prCConoce" style="flex:1 1 100%"><label>Letras que ya conoce (toca las que sabe)</label><div class="letras" id="prConoce"></div></div>
         <div class="campo" id="prCSil"><label for="prSil">Sílabas</label><select id="prSil"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o más</option></select></div>
       </div>
       <div class="fila2">
         <div class="campo"><label for="prMeta">Palabras por tanda</label><select id="prMeta"><option>5</option><option>10</option><option>15</option><option>20</option></select></div>
-        <div class="campo"><label for="prNivel">Dificultad</label><select id="prNivel"><option value="auto">Se adapta sola</option><option value="1">1 · muy tranquila</option><option value="2">2</option><option value="3">3</option><option value="4">4 · rápida</option></select></div>
+        <div class="campo"><label for="prNivel">Dificultad</label><select id="prNivel"><option value="auto">Se adapta sola</option><option value="1">1 · muy tranquila</option><option value="2">2</option><option value="3">3</option><option value="4">4 · rápida</option><option value="5">5 · más rápida</option><option value="6">6 · la más rápida</option></select></div>
         <div class="campo"><label for="prVel">Ritmo</label><select id="prVel"><option value="">Normal</option><option value="lenta">Más lento</option></select></div>
+      </div>
+      <div class="opciones">
+        <label class="op"><input type="checkbox" id="prDirectas"> <span><b>Solo sílabas directas</b> (ma, pe, si, so, mu…; sin trabadas ni sílabas cerradas)</span></label>
+        <label class="op"><input type="checkbox" id="prSolo"> <span><b>Jugar solo con mis palabras</b> (las del paso 3)</span></label>
+        <label class="op"><input type="checkbox" id="prAudio"> <span><b>🎧 A oído:</b> la serpiente busca audios, no palabras escritas</span></label>
+        <p class="nota" id="prAudioNota" style="text-align:left;margin:2px 0 0"></p>
       </div>
       <h2>3 · Palabras de tu paciente (opcional)</h2>
       <textarea id="prPropias" placeholder="Escribe las tuyas separadas por comas: rueda, ratón, arroz…" aria-label="Palabras propias"></textarea>
-      <p class="nota" style="text-align:left">Se suman a las 241 del juego y siguen la misma regla. Sin nombres de personas. Estas no tienen voz y sus sílabas se cuentan de forma aproximada.</p>
+      <p class="nota" style="text-align:left">Se suman a las 317 del juego y siguen la misma regla. Sin nombres de personas. Estas no tienen voz y sus sílabas se cuentan de forma aproximada.</p>
       <div class="resumen" id="prResumen"></div>
       <div style="text-align:center">
         <button class="btn" id="prJugar" type="button">▶ Jugar ahora</button>
@@ -232,8 +246,9 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
 
     <div class="velo on" id="vInicio"><div class="tarjeta">
       <h1>🐍 Snake de palabras</h1>
+      <div id="inicioMundos"></div>
       <div class="gran" id="inicioRegla"></div>
-      <div class="pasos"><div><i>👆</i>Desliza el dedo (o usa las flechas) para mover la serpiente</div><div><i>🔎</i>Lee las palabras del tablero</div><div><i>✅</i>Come <b>solo</b> las que cumplen la regla</div></div>
+      <div class="pasos"><div><i>👆</i>Desliza el dedo (o usa las flechas) para mover la serpiente</div><div><i>🔎</i><span id="pasoLee">Lee las palabras del tablero</span></div><div><i>✅</i>Come <b>solo</b> las que cumplen la regla</div></div>
       <p>Si comes una que no la cumple, te diré por qué. No pasa nada: ¡sigue!</p>
       <button class="btn" id="bJugar" type="button">▶ Jugar</button>
       <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>
@@ -259,19 +274,20 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
 
     <div class="velo" id="vAjustes"><div class="tarjeta" style="text-align:left">
       <h1 style="text-align:center">⚙️ Ajustes (logopeda)</h1>
-      <div class="campo"><label for="aRegla">Regla</label><select id="aRegla"><option value="empieza">Come las que EMPIEZAN por…</option><option value="contiene">Come las que CONTIENEN…</option><option value="termina">Come las que TERMINAN en…</option><option value="silabas">Come las de N sílabas</option><option value="todas">Todas (sin intrusas)</option></select></div>
+      <div class="campo"><label for="aRegla">Regla</label><select id="aRegla"><option value="empieza">Come las que EMPIEZAN por…</option><option value="contiene">Come las que CONTIENEN…</option><option value="termina">Come las que TERMINAN en…</option><option value="silabas">Come las de N sílabas</option><option value="larga">Palabras largas (3+ sílabas)</option><option value="trabada">Con sílaba trabada</option><option value="parecida">Palabras parecidas (una sola vale)</option><option value="espejo">Letras espejo (b/d, p/q)</option><option value="real">Palabras que existen (no inventadas)</option><option value="ortografia">Bien escritas (b/v, ll/y, h, s/z)</option><option value="todas">Todas (sin intrusas)</option></select></div>
       <div class="campo" id="cLetra"><label>Letra o grupo</label><div class="letras" id="aLetras"></div></div>
       <div class="campo" id="cSil"><label for="aSil">Sílabas</label><select id="aSil"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o más</option></select></div>
       <div class="campo"><label for="aMeta">Palabras por tanda</label><select id="aMeta"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
-      <div class="campo"><label for="aNivel">Dificultad</label><select id="aNivel"><option value="auto">Se adapta sola</option><option value="1">Nivel 1 (fijo)</option><option value="2">Nivel 2 (fijo)</option><option value="3">Nivel 3 (fijo)</option><option value="4">Nivel 4 (fijo)</option></select></div>
+      <div class="campo"><label for="aNivel">Dificultad</label><select id="aNivel"><option value="auto">Se adapta sola</option><option value="1">Nivel 1 (fijo)</option><option value="2">Nivel 2 (fijo)</option><option value="3">Nivel 3 (fijo)</option><option value="4">Nivel 4 (fijo)</option><option value="5">Nivel 5 (fijo)</option><option value="6">Nivel 6 (fijo, rápido)</option></select></div>
       <div style="text-align:center"><button class="btn" id="bAplica" type="button">Aplicar</button><button class="btn s" id="bCierra" type="button">Cerrar</button></div>
     </div></div>
   </div>
 </div>
 
+<script src="estrellas-mundos.js"></script>
 <script>
 /* banco propio de Fönia: [palabra, sílabas] */
-var BANCO_JSON = [["ala", 2], ["amarillo", 4], ["araña", 3], ["arroz", 2], ["azul", 2], ["azúcar", 3], ["año", 2], ["ballena", 3], ["balón", 2], ["barro", 2], ["bicicleta", 4], ["boca", 2], ["bota", 2], ["botella", 3], ["botón", 2], ["burro", 2], ["cabaña", 3], ["cabeza", 3], ["calcetín", 3], ["calculadora", 5], ["calendario", 4], ["calle", 2], ["cama", 2], ["camisa", 3], ["caramelo", 4], ["carro", 2], ["casa", 2], ["castillo", 3], ["cazo", 2], ["chaqueta", 3], ["charco", 2], ["chicle", 2], ["chimenea", 4], ["chocolate", 4], ["chupete", 3], ["cielo", 2], ["coche", 2], ["cocina", 3], ["cocodrilo", 4], ["col", 1], ["cometa", 3], ["conejo", 3], ["correr", 2], ["cruz", 1], ["cuchara", 3], ["cuchillo", 3], ["cuna", 2], ["dado", 2], ["dama", 2], ["dedo", 2], ["diente", 2], ["dinero", 3], ["dinosaurio", 4], ["disco", 2], ["doce", 2], ["dos", 1], ["dulce", 2], ["elefante", 4], ["escuela", 3], ["espejo", 3], ["falda", 2], ["familia", 3], ["faro", 2], ["flecha", 2], ["flor", 1], ["flores", 2], ["foca", 2], ["foto", 2], ["fresa", 2], ["fruta", 2], ["fuego", 2], ["fuente", 2], ["gallina", 3], ["gato", 2], ["globo", 2], ["goma", 2], ["guitarra", 3], ["gusano", 3], ["helado", 3], ["helicóptero", 5], ["hermano", 3], ["hipopótamo", 5], ["hoja", 2], ["isla", 2], ["jabón", 2], ["jardín", 2], ["jarra", 2], ["jaula", 2], ["jirafa", 3], ["joya", 2], ["juego", 2], ["jugo", 2], ["lana", 2], ["lazo", 2], ["leche", 2], ["lechuga", 3], ["lento", 2], ["ley", 1], ["león", 2], ["libro", 2], ["limón", 2], ["llave", 2], ["lluvia", 2], ["lobo", 2], ["luna", 2], ["lupa", 2], ["luz", 1], ["lámpara", 3], ["lápiz", 2], ["manzana", 3], ["mapa", 2], ["mar", 1], ["mariposa", 4], ["melón", 2], ["mermelada", 4], ["mes", 1], ["mesa", 2], ["miel", 1], ["mochila", 3], ["moneda", 3], ["mono", 2], ["montaña", 3], ["moto", 2], ["muñeca", 3], ["naranja", 3], ["nariz", 2], ["negro", 2], ["nene", 2], ["nido", 2], ["nieve", 2], ["noche", 2], ["nombre", 2], ["nota", 2], ["nube", 2], ["nuez", 1], ["ojo", 2], ["ordenador", 4], ["oso", 2], ["paloma", 3], ["pan", 1], ["pantalón", 3], ["papel", 2], ["pared", 2], ["pastel", 2], ["patata", 3], ["pato", 2], ["payaso", 3], ["pañuelo", 3], ["peine", 2], ["pelo", 2], ["pelota", 3], ["pepino", 3], ["perro", 2], ["pez", 1], ["pie", 1], ["pila", 2], ["pino", 2], ["pizarra", 3], ["piña", 2], ["plato", 2], ["plaza", 2], ["plátano", 3], ["pollo", 2], ["puente", 2], ["puerta", 2], ["pájaro", 3], ["queso", 2], ["quince", 2], ["radio", 2], ["rama", 2], ["rana", 2], ["ratón", 2], ["red", 1], ["refrigerador", 5], ["regla", 2], ["reloj", 2], ["rey", 1], ["rizo", 2], ["roca", 2], ["rojo", 2], ["ropa", 2], ["rosa", 2], ["rueda", 2], ["ruido", 2], ["río", 2], ["sal", 1], ["salón", 2], ["sandía", 3], ["sapo", 2], ["seis", 1], ["semana", 3], ["semáforo", 4], ["serpiente", 3], ["silla", 2], ["sillón", 2], ["sirena", 3], ["sol", 1], ["sombrero", 3], ["sonrisa", 3], ["sopa", 2], ["sueño", 2], ["sábana", 3], ["tapa", 2], ["taxi", 2], ["taza", 2], ["televisión", 4], ["teléfono", 4], ["tierra", 2], ["tigre", 2], ["tijera", 3], ["tiza", 2], ["toalla", 3], ["tobogán", 3], ["tomate", 3], ["torre", 2], ["tortuga", 3], ["tren", 1], ["tres", 1], ["trueno", 2], ["túnel", 2], ["uno", 2], ["uva", 2], ["uña", 2], ["vaca", 2], ["vaso", 2], ["vecino", 3], ["vela", 2], ["ventana", 3], ["verde", 2], ["vestido", 3], ["viento", 2], ["violín", 2], ["volcán", 2], ["voz", 1], ["yema", 2], ["yoyó", 2], ["zanahoria", 4], ["zapato", 3], ["zorro", 2], ["zumo", 2], ["árbol", 2]];
+var BANCO_JSON = [["ala", 2], ["amarillo", 4], ["araña", 3], ["arroz", 2], ["azul", 2], ["azúcar", 3], ["año", 2], ["ballena", 3], ["balón", 2], ["barro", 2], ["bicicleta", 4], ["boca", 2], ["bota", 2], ["botella", 3], ["botón", 2], ["burro", 2], ["cabaña", 3], ["cabeza", 3], ["calcetín", 3], ["calculadora", 5], ["calendario", 4], ["calle", 2], ["cama", 2], ["camisa", 3], ["caramelo", 4], ["carro", 2], ["casa", 2], ["castillo", 3], ["cazo", 2], ["chaqueta", 3], ["charco", 2], ["chicle", 2], ["chimenea", 4], ["chocolate", 4], ["chupete", 3], ["cielo", 2], ["coche", 2], ["cocina", 3], ["cocodrilo", 4], ["col", 1], ["cometa", 3], ["conejo", 3], ["correr", 2], ["cruz", 1], ["cuchara", 3], ["cuchillo", 3], ["cuna", 2], ["dado", 2], ["dama", 2], ["dedo", 2], ["diente", 2], ["dinero", 3], ["dinosaurio", 4], ["disco", 2], ["doce", 2], ["dos", 1], ["dulce", 2], ["elefante", 4], ["escuela", 3], ["espejo", 3], ["falda", 2], ["familia", 3], ["faro", 2], ["flecha", 2], ["flor", 1], ["flores", 2], ["foca", 2], ["foto", 2], ["fresa", 2], ["fruta", 2], ["fuego", 2], ["fuente", 2], ["gallina", 3], ["gato", 2], ["globo", 2], ["goma", 2], ["guitarra", 3], ["gusano", 3], ["helado", 3], ["helicóptero", 5], ["hermano", 3], ["hipopótamo", 5], ["hoja", 2], ["isla", 2], ["jabón", 2], ["jardín", 2], ["jarra", 2], ["jaula", 2], ["jirafa", 3], ["joya", 2], ["juego", 2], ["jugo", 2], ["lana", 2], ["lazo", 2], ["leche", 2], ["lechuga", 3], ["lento", 2], ["ley", 1], ["león", 2], ["libro", 2], ["limón", 2], ["llave", 2], ["lluvia", 2], ["lobo", 2], ["luna", 2], ["lupa", 2], ["luz", 1], ["lámpara", 3], ["lápiz", 2], ["manzana", 3], ["mapa", 2], ["mar", 1], ["mariposa", 4], ["melón", 2], ["mermelada", 4], ["mes", 1], ["mesa", 2], ["miel", 1], ["mochila", 3], ["moneda", 3], ["mono", 2], ["montaña", 3], ["moto", 2], ["muñeca", 3], ["naranja", 3], ["nariz", 2], ["negro", 2], ["nene", 2], ["nido", 2], ["nieve", 2], ["noche", 2], ["nombre", 2], ["nota", 2], ["nube", 2], ["nuez", 1], ["ojo", 2], ["ordenador", 4], ["oso", 2], ["paloma", 3], ["pan", 1], ["pantalón", 3], ["papel", 2], ["pared", 2], ["pastel", 2], ["patata", 3], ["pato", 2], ["payaso", 3], ["pañuelo", 3], ["peine", 2], ["pelo", 2], ["pelota", 3], ["pepino", 3], ["perro", 2], ["pez", 1], ["pie", 1], ["pila", 2], ["pino", 2], ["pizarra", 3], ["piña", 2], ["plato", 2], ["plaza", 2], ["plátano", 3], ["pollo", 2], ["puente", 2], ["puerta", 2], ["pájaro", 3], ["queso", 2], ["quince", 2], ["radio", 2], ["rama", 2], ["rana", 2], ["ratón", 2], ["red", 1], ["refrigerador", 5], ["regla", 2], ["reloj", 2], ["rey", 1], ["rizo", 2], ["roca", 2], ["rojo", 2], ["ropa", 2], ["rosa", 2], ["rueda", 2], ["ruido", 2], ["río", 2], ["sal", 1], ["salón", 2], ["sandía", 3], ["sapo", 2], ["seis", 1], ["semana", 3], ["semáforo", 4], ["serpiente", 3], ["silla", 2], ["sillón", 2], ["sirena", 3], ["sol", 1], ["sombrero", 3], ["sonrisa", 3], ["sopa", 2], ["sueño", 2], ["sábana", 3], ["tapa", 2], ["taxi", 2], ["taza", 2], ["televisión", 4], ["teléfono", 4], ["tierra", 2], ["tigre", 2], ["tijera", 3], ["tiza", 2], ["toalla", 3], ["tobogán", 3], ["tomate", 3], ["torre", 2], ["tortuga", 3], ["tren", 1], ["tres", 1], ["trueno", 2], ["túnel", 2], ["uno", 2], ["uva", 2], ["uña", 2], ["vaca", 2], ["vaso", 2], ["vecino", 3], ["vela", 2], ["ventana", 3], ["verde", 2], ["vestido", 3], ["viento", 2], ["violín", 2], ["volcán", 2], ["voz", 1], ["yema", 2], ["yoyó", 2], ["zanahoria", 4], ["zapato", 3], ["zorro", 2], ["zumo", 2], ["árbol", 2], ["murciélago", 4], ["calabaza", 4], ["bolígrafo", 4], ["cuaderno", 3], ["zapatilla", 4], ["camiseta", 4], ["bufanda", 3], ["paraguas", 3], ["tenedor", 3], ["lavadora", 4], ["biblioteca", 5], ["farmacia", 3], ["autobús", 3], ["bombero", 3], ["policía", 4], ["cocinero", 4], ["panadero", 4], ["peluquero", 4], ["dentista", 3], ["profesor", 3], ["vacaciones", 4], ["cumpleaños", 4], ["invierno", 3], ["verano", 3], ["primavera", 4], ["tormenta", 3], ["relámpago", 4], ["desierto", 3], ["planeta", 3], ["estrella", 3], ["cohete", 3], ["astronauta", 4], ["tiburón", 3], ["cangrejo", 3], ["canguro", 3], ["mariquita", 4], ["saltamontes", 4], ["hormiga", 3], ["caracol", 3], ["lagartija", 4], ["tortilla", 3], ["croqueta", 3], ["bocadillo", 4], ["galleta", 3], ["magdalena", 4], ["palomitas", 4], ["brazo", 2], ["blanco", 2], ["bloque", 2], ["clavo", 2], ["grifo", 2], ["prado", 2], ["trigo", 2], ["dragón", 2], ["cristal", 2], ["problema", 3], ["bruja", 2], ["cabra", 2], ["sobre", 2], ["planta", 2], ["premio", 2], ["tractor", 2], ["trompeta", 3], ["bandera", 3], ["hielo", 2], ["huevo", 2], ["higo", 2], ["gigante", 3], ["jefe", 2], ["gemelo", 3], ["bombilla", 3], ["cereza", 3], ["pozo", 2], ["pipa", 2], ["boda", 2], ["duda", 2]];
 </script>
 <div class="despedida" id="vDespedida" role="dialog" aria-label="Antes de irte"><div class="despedida-caja"><button type="button" id="dCerrar" class="despedida-x" aria-label="Cerrar">✕</button><p class="despedida-t">Antes de irte…</p><a class="cta" data-skool="despedida" href="https://www.skool.com/logopedia-7339/about" target="_blank" rel="noopener"><span class="cta-abeja" aria-hidden="true">🐝</span><span class="cta-txt"><b>Llévate más juegos como este</b><span>Están en ColmenIA, la comunidad de más de 170 logopedas y maestras.</span><span class="cta-lista"><i>🏎️ FonoKart</i><i>🏃 FonoDash</i><i>🐍 y los que van saliendo</i></span></span><span class="cta-ir">Entrar <span aria-hidden="true">→</span></span></a></div></div>
 <script src="snake-voz/indice.js"></script>
@@ -293,17 +309,41 @@ var BANCO = BANCO_JSON.map(function (p) { return { w: p[0], n: p[1], k: norm(p[0
 /* ====================== opciones (la logopeda las fija por enlace) ====================== */
 var CASO = ''; /* versión pública: sin paciente, no se envía nada a ningún sitio */
 var TERAPEUTA = (function () { var v = (QS.get('t') || '').trim(); return /^[A-Za-zÀ-ÿ .'-]{2,40}$/.test(v) ? v : ''; })();
-var FIJADO = ['empieza', 'contiene', 'termina', 'silabas', 'todas'].indexOf(QS.get('filtro')) >= 0;
+var FIJADO = ['empieza', 'contiene', 'termina', 'silabas', 'todas', 'larga', 'trabada', 'parecida', 'espejo', 'real', 'ortografia', 'conocidas'].indexOf(QS.get('filtro')) >= 0;
 var OPC = {
   regla: FIJADO ? QS.get('filtro') : 'empieza',
   letra: (QS.get('letra') || 'r').toLowerCase().replace(/[^a-zñ]/g, '').slice(0, 2) || 'r',
   silabas: nEntre(QS.get('silabas'), 1, 4, 2),
   meta: nEntre(QS.get('meta'), 3, 30, 10),
-  nivel: QS.get('nivel') ? nEntre(QS.get('nivel'), 1, 4, 1) : 0,         /* 0 = se adapta sola */
+  nivel: QS.get('nivel') ? nEntre(QS.get('nivel'), 1, 6, 1) : 0,         /* 0 = se adapta sola */
   distractores: QS.get('distractores') === null ? null : nEntre(QS.get('distractores'), 0, 5, 1),
-  velocidad: QS.get('velocidad')
+  velocidad: QS.get('velocidad'),
+  conoce: parseConoce(QS.get('conoce')), directas: QS.get('directas') === '1', soloPropias: QS.get('solo') === '1', audio: QS.get('modo') === 'audio'
 };
+function parseConoce(txt) {
+  var ok = 'a b c ch d e f g h i j k l ll m n ñ o p q r rr s t u v w x y z'.split(' '), sal = [], vistos = {};
+  String(txt || '').toLowerCase().split(/[\s,;.]+/).forEach(function (x) { if (ok.indexOf(x) >= 0 && !vistos[x]) { vistos[x] = 1; sal.push(x); } });
+  return sal.length ? sal : ['a', 'm', 'e', 'o', 's', 'p', 'n'];
+}
 var KOPC = 'fonia-snake-opc';
+/* Mundos (José, 15/10/2026): guardar partida por caso, con estrellas 1-3 por tanda y mundos que se desbloquean.
+   Cada mundo es una regla clínica: avanzar en el juego es avanzar en lo que trabaja. Pieza común: estrellas-mundos.js.
+   Si la ficha fija la regla (?filtro=), no hay mundos; con ?mundo=N la ficha fija el mundo. */
+var MUNDOS_DEF = [
+  { id: 'empieza', regla: 'empieza', titulo: 'Empieza por…', icono: '🌱', nota: 'Sonido inicial' },
+  { id: 'larga', regla: 'larga', titulo: 'Palabras largas', icono: '🐌', nota: 'Leer palabras de 3 y 4 sílabas' },
+  { id: 'trabada', regla: 'trabada', titulo: 'Trabadas', icono: '🧱', nota: 'Sílabas trabadas: pla, tre, bra…' },
+  { id: 'parecida', regla: 'parecida', titulo: 'Parecidas', icono: '👀', nota: 'Distinguir palabras que se parecen por la forma' },
+  { id: 'espejo', regla: 'espejo', titulo: 'Espejo', icono: '🪞', nota: 'b/d y p/q dentro de la palabra' },
+  { id: 'real', regla: 'real', titulo: '¿Existe?', icono: '🧪', nota: 'Palabra que existe frente a inventada' },
+  { id: 'ortografia', regla: 'ortografia', titulo: 'Bien escrita', icono: '✍️', nota: 'Ortografía: b/v, ll/y, h, s/z' }
+];
+var MUNDOS = null;
+function montaMundos() {
+  if (FIJADO || !window.FoniaMundos) return;
+  MUNDOS = FoniaMundos({ juego: 'snake', caso: CASO, mundos: MUNDOS_DEF, fijado: nEntre(QS.get('mundo'), 1, MUNDOS_DEF.length, 0) });
+  OPC.regla = MUNDOS.mundo().regla;
+}
 if (!FIJADO) { try { var g = JSON.parse(localStorage.getItem(KOPC) || 'null'); if (g) { OPC.regla = g.regla || OPC.regla; OPC.letra = g.letra || OPC.letra; OPC.silabas = g.silabas || OPC.silabas; OPC.meta = g.meta || OPC.meta; OPC.nivel = g.nivel === undefined ? OPC.nivel : g.nivel; } } catch (e) { } }
 if (FIJADO) document.body.classList.add('fijado');
 
@@ -315,15 +355,27 @@ function cumple(p) {
     case 'contiene': return k.indexOf(l) >= 0;
     case 'termina': return k.length >= l.length && k.lastIndexOf(l) === k.length - l.length;
     case 'silabas': return OPC.silabas >= 4 ? p.n >= 4 : p.n === OPC.silabas;
+    case 'conocidas': return todasConocidas(p.w);
+    case 'larga': return p.n >= 3;
+    case 'trabada': return TRABADA.test(k);
+    case 'parecida': case 'espejo': case 'real': case 'ortografia': return !!p.vale;
     default: return true;
   }
 }
-function reglaHtml() {
+function reglaHtml() { return reglaHtml0() + sufijoRegla(); }
+function reglaHtml0() {
   var L = OPC.letra.toUpperCase(), r = OPC.regla;
+  if (r === 'conocidas') return 'las que se leen con <b>' + OPC.conoce.slice(0, 8).join(' ') + (OPC.conoce.length > 8 ? '…' : '') + '</b>';
   if (r === 'empieza') return 'las que EMPIEZAN por <b>' + L + '</b>';
   if (r === 'contiene') return 'las que CONTIENEN <b>' + L + '</b>';
   if (r === 'termina') return 'las que TERMINAN en <b>' + L + '</b>';
   if (r === 'silabas') return OPC.silabas >= 4 ? 'las de <b>4+</b> sílabas' : 'las de <b>' + OPC.silabas + '</b> sílaba' + (OPC.silabas === 1 ? '' : 's');
+  if (r === 'larga') return 'las LARGAS: <b>3+</b> sílabas';
+  if (r === 'trabada') return 'las que tienen <b>pla, tre, bra…</b>';
+  if ((r === 'parecida' || r === 'espejo') && S && S.obj) return 'solo «<b>' + S.obj + '</b>»';
+  if (r === 'parecida' || r === 'espejo') return 'solo la palabra que te pido';
+  if (r === 'real') return 'las que <b>EXISTEN</b>';
+  if (r === 'ortografia') return 'las <b>BIEN ESCRITAS</b>';
   return 'todas las palabras';
 }
 function reglaTexto() { return reglaHtml().replace(/<[^>]+>/g, ''); }
@@ -333,6 +385,12 @@ function porQueNo(p) {
   if (r === 'contiene') return 'no tiene ' + L;
   if (r === 'termina') return 'no termina en ' + L;
   if (r === 'silabas') return 'tiene ' + p.n + ' sílaba' + (p.n === 1 ? '' : 's') + ', no ' + (OPC.silabas >= 4 ? '4 o más' : OPC.silabas);
+  if (r === 'larga') return 'tiene ' + p.n + ' sílaba' + (p.n === 1 ? '' : 's');
+  if (r === 'conocidas') return 'lleva la «' + primeraDesconocida(p.w) + '», que aún no conoce';
+  if (r === 'trabada') return 'no tiene sílaba trabada';
+  if (r === 'parecida' || r === 'espejo') return 'era «' + p.w + '», buscabas «' + (S && S.obj) + '»';
+  if (r === 'real') return 'no existe: es inventada';
+  if (r === 'ortografia') return 'está mal escrita: es «' + p.bien + '»';
   return '';
 }
 function porQueSi(p) {
@@ -341,7 +399,87 @@ function porQueSi(p) {
   if (r === 'contiene') return 'tiene ' + L;
   if (r === 'termina') return 'termina en ' + L;
   if (r === 'silabas') return p.n + ' sílaba' + (p.n === 1 ? '' : 's');
+  if (r === 'larga') return p.n + ' sílabas';
+  if (r === 'conocidas') return 'solo letras que conoce';
+  if (r === 'trabada') return 'tiene sílaba trabada';
+  if (r === 'parecida' || r === 'espejo') return '¡era esa!';
+  if (r === 'real') return 'existe';
+  if (r === 'ortografia') return 'bien escrita';
   return '';
+}
+
+/* ====================== reglas nuevas (15/10/2026, caso de 13 años con dislexia) ======================
+   Pedido de José vía Revisor: más difícil y más profundo. Su punto débil es distinguir palabras y letras que se
+   parecen y la memoria de trabajo. Las intrusas se GENERAN a partir de la palabra buena:
+   · parecida: cambia una letra por otra que se le parece por la forma (casa/cosa, bota/dota, mesa/rnesa…);
+   · espejo: cambia b/d o p/q DENTRO de la palabra (dado/bado);
+   · real: palabra inventada (intercambia dos consonantes o cambia una vocal) frente a la palabra que existe;
+   · ortografia: la misma palabra mal escrita (b/v, ll/y, h inicial, z/s) frente a la bien escrita.
+   Contenido propio, pendiente de revisión clínica: alguna «inventada» podría existir en el diccionario. */
+var TRABADA = /(pr|br|tr|dr|cr|gr|fr|pl|bl|cl|gl|fl)/;
+var REALES = {}; BANCO.forEach(function (p) { REALES[p.k] = 1; });
+/* palabras que existen aunque no estén en el banco: homófonos y cortas que salían como «inventadas» o «mal escritas» */
+['tasa', 'baca', 'casa', 'sumo', 'bello', 'vello', 'cayo', 'callo', 'haya', 'halla', 'aya', 'ola', 'hola', 'asta', 'hasta', 'echo', 'hecho', 'ay', 'hay', 'ahí', 'tubo', 'tuvo', 'botar', 'votar', 'sabia', 'savia', 'rallar', 'rayar', 'cien', 'sien', 'losa', 'loza', 'masa', 'maza', 'risa', 'riza', 'poso', 'pozo', 'cava', 'daba', 'iva', 'rize', 'vaya', 'valla', 'baya', 'bala', 'vale', 'base', 'vase', 'bota', 'vota', 'beso', 'peso', 'hora', 'ora', 'onda', 'honda', 'hierro', 'yerro', 'cabo', 'cavo', 'graba', 'grava', 'ves', 'vez', 'cocer', 'coser', 'sima', 'cima', 'seta', 'zeta', 'abría', 'habría'].forEach(function (w) { REALES[w] = 1; });
+var PARECE = { a: ['o', 'e'], o: ['a', 'c'], e: ['c', 'a'], c: ['e', 'o'], n: ['m', 'u', 'r'], m: ['n'], u: ['n', 'v'], r: ['n'], i: ['l', 'j'], l: ['i', 't'], t: ['f', 'l'], f: ['t'], h: ['n'], b: ['d', 'h'], d: ['b', 'q'], p: ['q', 'b'], q: ['p', 'g'], g: ['q'] };
+var ESPEJO = { b: 'd', d: 'b', p: 'q', q: 'p' };
+function variantes(w, modo) {
+  var out = {}, i, c, alt, j;
+  for (i = 0; i < w.length; i++) {
+    c = w[i];
+    alt = modo === 'espejo' ? (ESPEJO[c] ? [ESPEJO[c]] : []) : (PARECE[c] || []).concat(ESPEJO[c] ? [ESPEJO[c]] : []);
+    for (j = 0; j < alt.length; j++) { var v = w.slice(0, i) + alt[j] + w.slice(i + 1); if (v !== w) out[v] = 1; }
+  }
+  return Object.keys(out);
+}
+function inventada(w) {
+  var ws = w.split(''), cons = [], i, intento;
+  for (i = 0; i < ws.length; i++) if (!/[aeiouáéíóú]/.test(ws[i])) cons.push(i);
+  for (intento = 0; intento < 12; intento++) {
+    /* dos cambios a la vez (intercambiar dos consonantes Y cambiar una vocal): con uno solo salían palabras que
+       existen (vaca → cava). Así casi nunca coincide con una palabra real. */
+    var r = ws.slice(), vs = [];
+    if (cons.length >= 2) { var a = cons[azar(cons.length)], b = cons[azar(cons.length)]; if (a !== b && r[a] !== r[b]) { var t = r[a]; r[a] = r[b]; r[b] = t; } }
+    for (i = 0; i < r.length; i++) if (/[aeiou]/.test(r[i])) vs.push(i);
+    if (vs.length) { var k = vs[azar(vs.length)]; r[k] = elige('aeiou'.replace(r[k], '').split('')); }
+    var x = r.join(''); if (x !== w && !REALES[norm(x)]) return x;
+  }
+  return null;
+}
+var FALTAS = [[/b/, 'v'], [/v/, 'b'], [/ll/, 'y'], [/y(?=[aeiou])/, 'll'], [/^h/, ''], [/z(?=[aou])/, 's'], [/ce/, 'se'], [/ci/, 'si'], [/g(?=[ei])/, 'j'], [/j(?=[ei])/, 'g']];
+function malEscrita(w) {
+  var op = baraja(FALTAS);
+  for (var i = 0; i < op.length; i++) { if (op[i][0].test(w)) { var x = w.replace(op[i][0], op[i][1]); if (x !== w && !REALES[norm(x)]) return x; } }
+  return null;
+}
+var GENERADA = { parecida: 1, espejo: 1, real: 1, ortografia: 1 };
+function confusionPal(p) {
+  if (!GENERADA[OPC.regla]) return confusion(p);
+  var a = norm((OPC.regla === 'parecida' || OPC.regla === 'espejo') ? (S && S.obj) : (p.bien || '')), b = p.k;
+  if (!a || a.length !== b.length) return OPC.regla === 'ortografia' && a ? 'falta de ortografía' : '';
+  for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] + '/' + b[i];
+  return '';
+}
+function nuevoObjetivo() {
+  var pool = BANCO.filter(function (p) { return p.n >= 2 && p.w.length >= 4 && (OPC.regla !== 'espejo' || /[bdpq]/.test(p.k)) && S.recientes.indexOf(p.w) < 0; });
+  var p = elige(pool); S.obj = p.w; S.objN = p.n; return p;
+}
+function palabraGenerada(ok) {
+  var usados = {}; S.tokens.forEach(function (t) { usados[t.p.w] = 1; });
+  var r = OPC.regla, i;
+  if (r === 'parecida' || r === 'espejo') {
+    if (!S.obj) nuevoObjetivo();
+    if (ok) return usados[S.obj] ? null : { w: S.obj, n: S.objN, k: norm(S.obj), vale: true };
+    var vs = baraja(variantes(S.obj, r)).filter(function (v) { return !usados[v]; });
+    return vs.length ? { w: vs[0], n: S.objN, k: norm(vs[0]), vale: false } : null;
+  }
+  for (i = 0; i < 25; i++) {
+    var p = elige(BANCO.filter(function (q) { return q.n >= 2 && !usados[q.w] && S.recientes.indexOf(q.w) < 0 && (r !== 'real' || q.k.length >= 5) && (r !== 'ortografia' || /(b|v|ll|y|^h|z|ce|ci|ge|gi|je|ji)/.test(q.k)); }));
+    if (!p) return null;
+    if (ok) return { w: p.w, n: p.n, k: p.k, vale: true };
+    var x = r === 'real' ? inventada(p.w) : malEscrita(p.w);
+    if (x && !usados[x]) return { w: x, n: p.n, k: norm(x), vale: false, bien: p.w };
+  }
+  return null;
 }
 var CONF = [['b', 'd'], ['p', 'q'], ['b', 'p'], ['d', 'p'], ['m', 'n'], ['n', 'u'], ['s', 'z'], ['c', 'g'], ['f', 'v'], ['a', 'e'], ['l', 'i'], ['t', 'd'], ['b', 'v'], ['r', 'l']];
 function confusion(p) { /* ¿la letra pedida se parece a la letra que sí tiene la palabra? */
@@ -384,7 +522,9 @@ function mod(a, n) { return ((a % n) + n) % n; }
 
 /* ====================== estado de la partida ====================== */
 var NIVELES = [
-  { vel: 3.4, obj: 1, dis: 1 }, { vel: 4.0, obj: 1, dis: 2 }, { vel: 4.6, obj: 2, dis: 3 }, { vel: 5.2, obj: 2, dis: 4 }
+  { vel: 3.4, obj: 1, dis: 1 }, { vel: 4.0, obj: 1, dis: 2 }, { vel: 4.6, obj: 2, dis: 3 }, { vel: 5.2, obj: 2, dis: 4 },
+  /* 15/10/2026 (caso de 13 años): más velocidad y más intrusas */
+  { vel: 5.9, obj: 2, dis: 5 }, { vel: 6.6, obj: 2, dis: 6 }
 ];
 var S = null;   /* partida */
 var jugando = false, pausado = false, ultimo = 0, acum = 0, loopOn = false;
@@ -394,11 +534,18 @@ var cola = [], dir = { x: 1, y: 0 };
 function nivelAct() { return NIVELES[S.nivel - 1]; }
 function pasoMs() { var v = nivelAct().vel; if (OPC.velocidad === 'lenta') v *= 0.75; else if (OPC.velocidad === 'rapida') v *= 1.3; return 1000 / v; }
 function nDis() { return OPC.regla === 'todas' ? 0 : (OPC.distractores !== null ? OPC.distractores : nivelAct().dis); }
-function nObj() { return nivelAct().obj; }
+function nObj() { return (OPC.regla === 'parecida' || OPC.regla === 'espejo') ? 1 : nivelAct().obj; }
 
+function reglaPosible() {
+  if (GENERADA[OPC.regla] || OPC.regla === 'todas') return;
+  var n = BANCO_JUEGO().filter(cumple).length;
+  if (n < 4 && OPC.regla !== 'contiene' && ['empieza', 'termina'].indexOf(OPC.regla) >= 0) { var antes = reglaTexto(); OPC.regla = 'contiene'; setTimeout(function () { aviso('Con «' + antes + '» casi no hay palabras: jugamos a las que CONTIENEN ' + OPC.letra.toUpperCase(), 'info'); }, 600); }
+}
 function nuevaPartida() {
-  var ini = OPC.nivel || 1;
-  S = { nivel: ini, aciertos: 0, comidas: [], errores: [], cuerpos: 0, racha: 0, rachaMax: 0, seguidosMal: 0, nivelMax: ini, inicio: Date.now(), enviada: false, motivo: '', cambiaNivel: [], recientes: [] };
+  reglaPosible();
+  var ini = OPC.nivel || (window.FoniaGraduacion ? FoniaGraduacion.inicio('snake', 1, 6, CASO).nivel : 1);
+  S = { nivel: ini, ini: ini, aciertos: 0, comidas: [], errores: [], cuerpos: 0, racha: 0, rachaMax: 0, seguidosMal: 0, nivelMax: ini, inicio: Date.now(), enviada: false, motivo: '', cambiaNivel: [], recientes: [], dec: [], obj: null, objN: 2 };
+  if (window.FoniaGraduacion && !OPC.nivel) { var gg = FoniaGraduacion.ultimo(); if (gg && gg.cambio !== 'igual' && gg.cambio !== 'nuevo') setTimeout(function () { aviso('Hoy empezamos en nivel ' + ini + ': ' + gg.motivo, 'info', 5000); }, 700); }
   var cx0 = Math.floor(COLS / 2), cy0 = Math.floor(ROWS / 2);
   S.snake = [{ x: cx0, y: cy0 }, { x: cx0 - 1, y: cy0 }, { x: cx0 - 2, y: cy0 }]; S.prev = S.snake.map(function (c) { return { x: c.x, y: c.y }; });
   S.crece = 0; S.tokens = []; dir = { x: 1, y: 0 }; cola = []; parts = []; flotantes = []; sacudida = 0; acum = 0;
@@ -415,6 +562,7 @@ function medidaPalabra(w) { cx.font = '700 ' + Math.round(CELL * 0.56) + 'px "At
 function creaToken(p, ok) {
   var tw = medidaPalabra(p.w), celdas = Math.max(2, Math.ceil((tw + CELL * 0.7) / CELL)), occ = ocupadas(), intentos = 0, x, y, bien;
   celdas = Math.min(celdas, COLS - 2);
+  if (audioOn()) celdas = 2;
   do {
     x = azar(COLS - celdas + 1); y = azar(ROWS); bien = true;
     for (var i = 0; i < celdas; i++) { if (occ[(x + i) + ',' + y]) { bien = false; break; } }
@@ -425,18 +573,121 @@ function creaToken(p, ok) {
   return { p: p, ok: ok, cells: cells, w: celdas, color: COLORES[azar(COLORES.length)], fase: Math.random() * 6.28, nace: Date.now(), t0: Date.now() };
 }
 function palabraNueva(ok) {
+  if (GENERADA[OPC.regla]) return palabraGenerada(ok);
   var usados = {}; S.tokens.forEach(function (t) { usados[t.p.w] = 1; }); S.recientes.forEach(function (w) { usados[w] = 1; });
-  var pool = BANCO.filter(function (p) { return !usados[p.w] && (cumple(p) === ok); });
-  if (!pool.length) pool = BANCO.filter(function (p) { return cumple(p) === ok && !S.tokens.some(function (t) { return t.p.w === p.w; }); });
+  var BJ = BANCO_JUEGO();
+  var pool = BJ.filter(function (p) { return !usados[p.w] && (cumple(p) === ok); });
+  if (!pool.length) pool = BJ.filter(function (p) { return cumple(p) === ok && !S.tokens.some(function (t) { return t.p.w === p.w; }); });
   if (!pool.length) return null;
   return elige(pool);
 }
 function rellena() {
   var okN = S.tokens.filter(function (t) { return t.ok; }).length, noN = S.tokens.length - okN, guard = 0;
-  while (okN < nObj() && guard++ < 20) { var p = palabraNueva(true); var t = p && creaToken(p, true); if (t) { S.tokens.push(t); okN++; } else break; }
+  /* 17/10/2026 (bichito: «no hay ninguna que empiece por R»): si la buena no cabía, se rendía y dejaba solo intrusas.
+     Ahora prueba con otras buenas y, si no hay sitio, quita una intrusa para hacerlo. */
+  var intentos = 0;
+  while (okN < nObj() && guard++ < 20) {
+    var p = palabraNueva(true); var t = p && creaToken(p, true);
+    if (t) { S.tokens.push(t); okN++; intentos = 0; continue; }
+    if (++intentos >= 6) { var k = -1; for (var z = 0; z < S.tokens.length; z++) if (!S.tokens[z].ok) k = z; if (k >= 0 && okN === 0) { S.tokens.splice(k, 1); noN--; intentos = 0; } else break; }
+  }
   guard = 0;
   while (noN < nDis() && guard++ < 20) { var q = palabraNueva(false); var u = q && creaToken(q, false); if (u) { S.tokens.push(u); noN++; } else break; }
 }
+
+/* ====================== ColmenIA · lo que han pedido en la comunidad (25/10/2026) ======================
+   1 · «Letras que ya conoce»: la serpiente come solo palabras que se leen con las letras que el niño sabe
+       (petición de Mai: a, m, e, o, s, p, n). Regla nueva: conocidas.
+   2 · «Solo sílabas directas» (ma, pe, si, so, mu…, sin trabadas ni sílabas cerradas): filtro que vale
+       para cualquier regla. Responde a «conoce la m y la a pero no dice ma».
+   3 · «Solo mis palabras»: el banco se reduce a las que ha escrito la logopeda.
+   4 · Modo oído: la serpiente busca audios, no palabras escritas (Raquel: discriminación auditiva, b/d).
+       Cada ficha es un altavoz; suena por turnos y cuando la cabeza se acerca; 🎧 la repite.
+       Solo con palabras que tienen voz y con reglas que se juzgan por el sonido. */
+function simbolosDe(w) {
+  var s = String(w).toLowerCase().replace(/[áàä]/g, 'a').replace(/[éèë]/g, 'e').replace(/[íìï]/g, 'i').replace(/[óòö]/g, 'o').replace(/[úùü]/g, 'u'), sal = [], i = 0, d;
+  while (i < s.length) {
+    d = s.substr(i, 2);
+    if (d === 'ch' || d === 'll' || d === 'rr') { sal.push(d); i += 2; } else { sal.push(s.charAt(i)); i++; }
+  }
+  return sal;
+}
+var CONOCE_CLAVE = '', CONOCE_MAPA = {};
+function conoceMapa() {
+  var k = OPC.conoce.join(',');
+  if (k !== CONOCE_CLAVE) { CONOCE_CLAVE = k; CONOCE_MAPA = {}; OPC.conoce.forEach(function (x) { CONOCE_MAPA[x] = 1; }); }
+  return CONOCE_MAPA;
+}
+function primeraDesconocida(w) {
+  var m = conoceMapa(), s = simbolosDe(w);
+  for (var i = 0; i < s.length; i++) if (!m[s[i]]) return s[i];
+  return '';
+}
+function todasConocidas(w) { return primeraDesconocida(w) === ''; }
+function directa(w) {
+  var s = String(w).toLowerCase().replace(/[áàä]/g, 'a').replace(/[éèë]/g, 'e').replace(/[íìï]/g, 'i').replace(/[óòö]/g, 'o').replace(/[úùü]/g, 'u')
+    .replace(/ch|ll|rr|qu/g, 'x').replace(/gu(?=[ei])/g, 'x');
+  return /^(?:[bcdfghjklmnñpqrstvwxyz]?[aeiou])+$/.test(s) && !/[aeiou]{2}/.test(s);
+}
+function conVoz(w) { return !!(window.VOZ_SNAKE && window.VOZ_SNAKE[w]); }
+function audioOn() { return !!OPC.audio && ['empieza', 'contiene', 'termina', 'silabas', 'todas', 'larga', 'trabada'].indexOf(OPC.regla) >= 0; }
+function BANCO_JUEGO(estricto) {
+  var oido = audioOn();
+  var l = BANCO.filter(function (p) {
+    if (oido && !conVoz(p.w)) return false;
+    if (OPC.soloPropias && !(p.propia || p.suya)) return false;
+    if (OPC.directas && !directa(p.w)) return false;
+    return true;
+  });
+  return (l.length || estricto) ? l : BANCO;
+}
+function sufijoRegla() {
+  var s = '';
+  if (OPC.directas) s += ' · solo <b>sílabas directas</b>';
+  if (OPC.soloPropias) s += ' · tus palabras';
+  if (audioOn()) s += ' · 🎧 <b>a oído</b>';
+  return s;
+}
+function cuenta(e) {
+  var g = { regla: OPC.regla, letra: OPC.letra, silabas: OPC.silabas, conoce: OPC.conoce, directas: OPC.directas, soloPropias: OPC.soloPropias, audio: OPC.audio };
+  var n = -1;
+  try {
+    OPC.regla = e.regla; OPC.letra = e.letra || OPC.letra; OPC.silabas = e.silabas || OPC.silabas; OPC.conoce = e.conoce && e.conoce.length ? e.conoce : OPC.conoce;
+    OPC.directas = !!e.directas; OPC.soloPropias = !!e.soloPropias; OPC.audio = !!e.audio;
+    if (!GENERADA[OPC.regla]) n = BANCO_JUEGO(true).filter(cumple).length;
+  } catch (x) { }
+  OPC.regla = g.regla; OPC.letra = g.letra; OPC.silabas = g.silabas; OPC.conoce = g.conoce; OPC.directas = g.directas; OPC.soloPropias = g.soloPropias; OPC.audio = g.audio;
+  return n;
+}
+
+/* ---------- modo oído ---------- */
+var oyendo = null, ultSuena = 0;
+function distToro(a, b) { var dx = Math.abs(a.x - b.x), dy = Math.abs(a.y - b.y); return Math.min(dx, COLS - dx) + Math.min(dy, ROWS - dy); }
+function suenaFicha(t) {
+  if (!t) return;
+  t.suena = Date.now(); t.oido = t.suena; ultSuena = t.suena; oyendo = t;
+  dicePalabra(t.p.w);
+  setTimeout(function () { if (oyendo === t) oyendo = null; }, 1200);
+}
+function fichaCercana() {
+  var h = S.snake[0], mejor = null, dm = 99, k, t, d;
+  for (k = 0; k < S.tokens.length; k++) {
+    t = S.tokens[k];
+    d = Math.min(distToro(h, t.cells[0]), distToro(h, t.cells[t.cells.length - 1]));
+    if (d < dm) { dm = d; mejor = t; }
+  }
+  return { t: mejor, d: dm };
+}
+function turnoOido() {
+  if (!S || !jugando || pausado || !S.tokens.length || !audioOn()) return;
+  var ahora = Date.now(), c = fichaCercana(), k, t, viejo = null;
+  if (ahora - ultSuena < 1400) return;
+  if (c.t && c.d <= 3 && ahora - (c.t.oido || 0) > 4500) { suenaFicha(c.t); return; }
+  if (ahora - ultSuena < 2600) return;
+  for (k = 0; k < S.tokens.length; k++) { t = S.tokens[k]; if (!viejo || (t.oido || 0) < (viejo.oido || 0)) viejo = t; }
+  suenaFicha(viejo);
+}
+$('bOir').onclick = function () { if (S && S.tokens.length && audioOn()) { var c = fichaCercana(); if (c.t) { if (!sonido) { sonido = true; $('bSonido').textContent = '🔊'; } suenaFicha(c.t); } } };
 
 /* ====================== mover ====================== */
 function paso() {
@@ -464,17 +715,20 @@ function decide(t, idx) {
   var ms = Date.now() - t.t0;
   S.tokens.splice(idx, 1);
   S.recientes.push(t.p.w); if (S.recientes.length > 8) S.recientes.shift();
+  /* detalle ítem a ítem (evento-sesion.js lo añade al envío): qué comió, si valía, cuál se pedía y cuándo */
+  try { (window.__foniaItems = window.__foniaItems || []).push({ w: t.p.w, ok: t.ok ? 1 : 0, ms: ms, pide: (OPC.regla === 'parecida' || OPC.regla === 'espejo') ? (S.obj || '') : (t.p.bien || ''), niv: S.nivel, regla: OPC.regla }); } catch (e) { }
   var cen = celdaPx(t.cells[0].x + (t.cells.length - 1) / 2, t.cells[0].y);
   if (t.ok) {
     S.aciertos++; S.racha++; S.rachaMax = Math.max(S.rachaMax, S.racha); S.seguidosMal = 0; S.crece += 1;
-    S.comidas.push({ w: t.p.w, ms: ms });
+    S.comidas.push({ w: t.p.w, ms: ms }); S.dec.push(1);
+    if (OPC.regla === 'parecida' || OPC.regla === 'espejo') { S.recientes.push(S.obj); S.obj = null; S.tokens = []; }
     sfxOk(); dicePalabra(t.p.w);
     aviso('✔ ' + t.p.w + ' · ' + porQueSi(t.p), 'ok');
     estalla(cen.x, cen.y, '#F4B93A', 14); flota(cen.x, cen.y - 10, '+1', '#1E7B4B');
-    if (S.racha > 0 && S.racha % 4 === 0 && !OPC.nivel && S.nivel < 4) { S.nivel++; S.nivelMax = Math.max(S.nivelMax, S.nivel); S.cambiaNivel.push('sube a ' + S.nivel); sfxNivel(); aviso('⭐ ¡Nivel ' + S.nivel + '!', 'info'); }
+    if (S.racha > 0 && S.racha % 4 === 0 && !OPC.nivel && S.nivel < 6 && S.nivel < S.ini + 2) { S.nivel++; S.nivelMax = Math.max(S.nivelMax, S.nivel); S.cambiaNivel.push('sube a ' + S.nivel); sfxNivel(); aviso('⭐ ¡Nivel ' + S.nivel + '!', 'info'); }
   } else {
     S.racha = 0; S.seguidosMal++;
-    S.errores.push({ w: t.p.w, por: porQueNo(t.p), conf: confusion(t.p), ms: ms });
+    S.errores.push({ w: t.p.w, por: porQueNo(t.p), conf: confusionPal(t.p), ms: ms, por_cual: (OPC.regla === 'parecida' || OPC.regla === 'espejo') ? S.obj : (t.p.bien || '') }); S.dec.push(0);
     sfxMal(); aviso('✘ ' + t.p.w + ' · ' + porQueNo(t.p), 'mal');
     estalla(cen.x, cen.y, '#D9483B', 8); if (!REDUCE) sacudida = 10;
     if (S.snake.length > 3) S.snake.pop();
@@ -550,7 +804,11 @@ function dibujaToken(t) {
   cx.fillStyle = '#FFFFFF'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill();
   cx.strokeStyle = t.color; cx.lineWidth = Math.max(3, CELL * 0.08); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke();
   cx.fillStyle = '#10231A'; cx.font = '700 ' + Math.round(CELL * 0.56) + 'px "Atkinson Hyperlegible",system-ui,sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  cx.fillText(t.p.w, w / 2, h / 2 + 1);
+  if (audioOn()) {
+    var suena = (Date.now() - (t.suena || 0)) < 1200;
+    if (suena) { cx.fillStyle = '#FFF0B3'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill(); cx.strokeStyle = t.color; cx.lineWidth = Math.max(3, CELL * 0.08); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke(); }
+    cx.fillStyle = '#10231A'; cx.font = Math.round(CELL * (suena ? 0.74 : 0.66)) + 'px Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,system-ui,sans-serif'; cx.fillText(suena ? '🔊' : '🔈', w / 2, h / 2 + 1);
+  } else cx.fillText(t.p.w, w / 2, h / 2 + 1);
   cx.restore();
 }
 function dibuja(alfa) {
@@ -579,20 +837,22 @@ function bucle(ts) {
   var alfa = 1;
   if (S && jugando && !pausado) { acum += dt; var pm = pasoMs(); while (acum >= pm && jugando) { acum -= pm; paso(); } alfa = jugando ? Math.min(1, acum / pm) : 1; }
   else if (S) alfa = 1;
-  avanzaEfectos(dt); dibuja(alfa);
+  turnoOido(); avanzaEfectos(dt); dibuja(alfa);
 }
 function arrancaBucle() { if (loopOn) return; loopOn = true; ultimo = 0; requestAnimationFrame(bucle); }
 
 /* ====================== interfaz ====================== */
 var avisoT = null;
-function aviso(t, tipo) { var a = $('aviso'); a.textContent = t; a.className = 'on ' + (tipo || 'info'); clearTimeout(avisoT); avisoT = setTimeout(function () { a.className = ''; a.textContent = S && jugando ? 'Lee bien antes de comer' : ''; }, 2400); }
+function aviso(t, tipo) { var a = $('aviso'); a.textContent = t; a.className = 'on ' + (tipo || 'info'); clearTimeout(avisoT); avisoT = setTimeout(function () { a.className = ''; a.textContent = S && jugando ? (audioOn() ? 'Escucha bien antes de comer' : 'Lee bien antes de comer') : ''; }, 2400); }
 function hud() {
-  $('chipRegla').innerHTML = reglaHtml();
+  $('chipRegla').innerHTML = reglaHtml(); $('bOir').style.display = audioOn() ? '' : 'none';
   $('hPunt').textContent = (S ? S.aciertos : 0) + '/' + OPC.meta;
   $('hRacha').textContent = S ? S.racha : 0;
 }
 function velo(id, on) { $(id).className = 'velo' + (on ? ' on' : ''); }
 function muestraInicio() {
+  if (MUNDOS) { OPC.regla = MUNDOS.mundo().regla; MUNDOS.pinta($('inicioMundos'), { alElegir: function () { muestraInicio(); hud(); } }); }
+  $('pasoLee').textContent = audioOn() ? 'Escucha las fichas: cada una suena' : 'Lee las palabras del tablero';
   $('inicioRegla').innerHTML = OPC.regla === 'todas' ? 'Come todas las palabras' : 'Come solo ' + reglaHtml();
   velo('vInicio', true);
 }
@@ -601,7 +861,8 @@ function juega() {
   try {
     if (!W || !COLS) medida();
     velo('vInicio', false); velo('vFin', false); velo('vPausa', false);
-    nuevaPartida(); jugando = true; pausado = false; arrancaBucle(); $('dpad').className = 'on';
+    if (audioOn() && !sonido) { sonido = true; $('bSonido').textContent = '🔊'; }
+    nuevaPartida(); jugando = true; pausado = false; arrancaBucle(); $('dpad').className = 'on'; document.documentElement.classList.add('fonia-jugando'); document.documentElement.classList.remove('fonia-herr');
   } catch (e) { muestraError('No he podido empezar: ' + (e && e.message ? e.message : e)); velo('vInicio', true); }
 }
 function muestraError(t) { var a = $('aviso'); if (a) { a.textContent = '⚠ ' + t; a.className = 'on mal'; } }
@@ -621,9 +882,13 @@ function terminar(motivo) {
   $('finRes').innerHTML = '<div><b>' + S.comidas.length + '</b>bien</div><div><b>' + S.errores.length + '</b>intrusas</div><div><b>' + Math.round(prec * 100) + ' %</b>acierto</div><div><b>' + S.rachaMax + '</b>mejor racha</div><div><b>' + Math.floor(seg / 60) + ':' + ('0' + (seg % 60)).slice(-2) + '</b>tiempo</div>';
   var ff = '';
   if (S.errores.length) { ff = '<p style="margin:10px 0 0;font-weight:700">Para recordar:</p><ul class="fallos">' + S.errores.slice(0, 5).map(function (e) { return '<li><b>' + e.w + '</b>: ' + e.por + '</li>'; }).join('') + '</ul>'; }
+  if (MUNDOS && motivo === 'meta') {
+    var rm = MUNDOS.termina({ pct: Math.round(prec * 100) }); S.partida = rm;
+    ff = '<p style="margin:8px 0 0">Mundo «' + MUNDOS.mundo().titulo + '»: mejor marca ' + '★★★'.slice(0, rm.mejor) + '</p>' + (rm.abre ? '<p style="margin:6px 0 0;font-weight:700">🔓 ¡Has abierto el mundo «' + rm.abre + '»!</p>' : '') + ff;
+  }
   $('finFallos').innerHTML = ff;
   $('finEnvio').textContent = 'Este informe no sale de este aparato si no lo compartes tú.';
-  velo('vFin', true); $('dpad').className = '';
+  velo('vFin', true); $('dpad').className = ''; document.documentElement.classList.remove('fonia-jugando'); document.documentElement.classList.remove('fonia-herr');
   envia(false);
 }
 
@@ -671,12 +936,13 @@ var LETRAS = 'a b c d e f g h j l m n ñ p q r rr s t v z ch ll'.split(' ');
 function pintaAjustes() {
   $('aRegla').value = OPC.regla; $('aSil').value = String(OPC.silabas); $('aMeta').value = String(OPC.meta); $('aNivel').value = OPC.nivel ? String(OPC.nivel) : 'auto';
   var c = $('aLetras'); c.innerHTML = ''; LETRAS.forEach(function (l) { var b = document.createElement('button'); b.type = 'button'; b.textContent = l; b.className = l === OPC.letra ? 'on' : ''; b.onclick = function () { OPC.letra = l; pintaAjustes(); }; c.appendChild(b); });
-  $('cLetra').style.display = (OPC.regla === 'silabas' || OPC.regla === 'todas') ? 'none' : ''; $('cSil').style.display = OPC.regla === 'silabas' ? '' : 'none';
+  $('cLetra').style.display = (['empieza', 'contiene', 'termina'].indexOf(OPC.regla) >= 0) ? '' : 'none'; $('cSil').style.display = OPC.regla === 'silabas' ? '' : 'none';
 }
 $('aRegla').onchange = function () { OPC.regla = $('aRegla').value; pintaAjustes(); };
 $('bAjustes').onclick = function () { if (jugando) pausa(true); pintaAjustes(); velo('vAjustes', true); };
 $('bCierra').onclick = function () { velo('vAjustes', false); };
 $('bAplica').onclick = function () {
+  if (MUNDOS && $('aRegla').value !== MUNDOS.mundo().regla) { MUNDOS = null; $('inicioMundos').innerHTML = ''; }
   OPC.regla = $('aRegla').value; OPC.silabas = parseInt($('aSil').value, 10); OPC.meta = parseInt($('aMeta').value, 10); OPC.nivel = $('aNivel').value === 'auto' ? 0 : parseInt($('aNivel').value, 10);
   try { localStorage.setItem(KOPC, JSON.stringify({ regla: OPC.regla, letra: OPC.letra, silabas: OPC.silabas, meta: OPC.meta, nivel: OPC.nivel })); } catch (e) { }
   velo('vAjustes', false); velo('vPausa', false); jugando = false; pausado = false; velo('vFin', false); hud(); muestraInicio();
@@ -700,25 +966,29 @@ function filasPartida(parcial) {
   var seg = Math.max(1, Math.round((Date.now() - S.inicio) / 1000));
   var confs = {}; err.forEach(function (e) { if (e.conf) confs[e.conf] = (confs[e.conf] || 0) + 1; });
   var como = prec === null || total < 4 ? 'sin dato' : (prec >= 0.85 ? 'bien' : (prec >= 0.6 ? 'regular' : 'le cuesta'));
-  var palErr = err.slice(0, 5).map(function (e) { return '«' + e.w + '» (' + e.por + ')'; }).join(' · ');
+  var palErr = err.slice(0, 6).map(function (e) { return e.por_cual ? '«' + e.w + '» por «' + e.por_cual + '»' : '«' + e.w + '» (' + e.por + ')'; }).join(' · ');
+  var d = S.dec, mit = Math.floor(d.length / 2), fat = d.length >= 6 ? Math.round(100 * d.slice(0, mit).reduce(function (a, b) { return a + b; }, 0) / mit) + ' % → ' + Math.round(100 * d.slice(mit).reduce(function (a, b) { return a + b; }, 0) / (d.length - mit)) + ' %' : 'pocas decisiones';
   return [
-    ['Regla', reglaTexto()], ['Tanda', parcial ? 'interrumpida (se salió o se ocultó la pantalla)' : (S.motivo === 'meta' ? 'completa (' + OPC.meta + ' palabras)' : 'terminada antes de la meta')],
+    ['Regla', OPC.regla === 'parecida' ? 'palabras parecidas por la forma: solo vale la que se pide' : (OPC.regla === 'espejo' ? 'letras espejo dentro de la palabra: solo vale la que se pide' : reglaTexto())], ['Mundo', MUNDOS ? (MUNDOS.actual() + 1) + ' de ' + MUNDOS_DEF.length + ' · ' + MUNDOS.mundo().titulo + (MUNDOS.fijado() ? ' (fijado por la logopeda)' : '') : 'sin mundos (regla fijada en la ficha)'], ['Tanda', parcial ? 'interrumpida (se salió o se ocultó la pantalla)' : (S.motivo === 'meta' ? 'completa (' + OPC.meta + ' palabras)' : 'terminada antes de la meta')],
     ['Palabras comidas', com.length + (com.length ? ' · ' + com.slice(0, 8).map(function (c) { return c.w; }).join(', ') : '')],
     ['Intrusas tocadas', err.length + (err.length ? ' · ' + palErr : '')],
     ['Acierto al elegir', prec === null ? 'sin datos' : Math.round(prec * 100) + ' % (' + com.length + ' bien, ' + err.length + ' intrusas)'],
     ['Letras que confunde', Object.keys(confs).length ? Object.keys(confs).map(function (k) { return k + ' ×' + confs[k]; }).join(', ') : 'ninguna detectada'],
     ['Tiempo por palabra', med === null ? 'sin datos' : coma((med / 1000).toFixed(1)) + ' s (mediana, desde que sale hasta que la come)'],
-    ['Nivel', 'empezó en ' + (OPC.nivel || 1) + ' · llegó a ' + S.nivelMax + (OPC.nivel ? ' (fijado por la logopeda)' : ' (se adapta sola)') + (S.cambiaNivel.length ? ' · ' + S.cambiaNivel.join(', ') : '')],
+    ['Nivel', 'empezó en ' + S.ini + ' · llegó a ' + S.nivelMax + (OPC.nivel ? ' (fijado por la logopeda)' : ' (se adapta sola)') + (S.cambiaNivel.length ? ' · ' + S.cambiaNivel.join(', ') : '')],
+    ['Fatiga (1ª mitad → 2ª mitad)', fat],
+    ['Partida (no es dato clínico)', MUNDOS ? MUNDOS.lineaEnvio().replace('Fönia · partida: ', '') : '—'],
     ['Mejor racha', String(S.rachaMax)], ['Se mordió la cola', String(S.cuerpos)], ['Duración', Math.floor(seg / 60) + ' min ' + (seg % 60) + ' s'],
     ['Medido por', 'el juego (toques y movimientos; no hay voz)'],
     ['Fönia · Cómo va', como],
     ['Fönia · Qué le cuesta', err.length ? 'se lanza a intrusas: ' + err.slice(0, 4).map(function (e) { return e.w; }).join(', ') + (Object.keys(confs).length ? ' · confunde ' + Object.keys(confs).join(', ') : '') : '—'],
-    ['Fönia · Qué toca ahora', como === 'bien' ? (S.nivelMax >= 4 ? 'cambiar la regla o la letra' : 'otra tanda: el nivel sube solo') : (como === 'sin dato' ? 'hacer una tanda completa' : 'repetir esta regla con calma (nivel 1-2)')]
+    ['Fönia · Qué toca ahora', como === 'bien' ? (S.nivelMax >= 6 ? 'cambiar la regla o pasar al mundo siguiente' : 'otra tanda: el nivel sube solo') : (como === 'sin dato' ? 'hacer una tanda completa' : 'repetir esta regla con calma (nivel 1-2)')]
   ];
 }
 function envia(parcial) {
   if (!S || S.enviada) return Promise.resolve('x'); if ((S.comidas.length + S.errores.length) < 1) return Promise.resolve('x'); if (parcial && (S.comidas.length + S.errores.length) < 3) return Promise.resolve('x');
   S.enviada = true;
+  if (window.FoniaGraduacion && !parcial && !OPC.nivel) { var tt = S.comidas.length + S.errores.length; FoniaGraduacion.registra('snake', CASO, { ini: S.ini, fin: S.nivelMax, pct: S.comidas.length / tt, n: tt, inc: false }); }
   if (!CASO) return Promise.resolve('sin-caso');
   var reg = { id: 'c' + CASO + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), caso: CASO, terapeuta: TERAPEUTA, texto: texto(filasPartida(parcial)) };
   alPanel(reg);
@@ -727,12 +997,14 @@ function envia(parcial) {
 if (false) (function () { leeCola().forEach(function (reg) { alRegistro(reg).then(function () { try { localStorage.setItem(COLA, JSON.stringify(leeCola().filter(function (x) { return x.id !== reg.id; }))); } catch (e) { } }).catch(function () { }); }); })();
 
 /* ====================== arranque ====================== */
-function arranque() { medida(); hud(); muestraInicio(); arrancaBucle(); dibuja(1); }
+function arranque() { montaMundos(); medida(); hud(); muestraInicio(); arrancaBucle(); dibuja(1); }
 arranque();   /* sin esperar a las fuentes: si tardan o no llegan, el juego arranca igual */
 if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function () { medida(); }, function () { }); }
-window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, OPC: OPC, cumple: cumple, BANCO: BANCO, estado: function () { return S; }, paso: function () { if (S && jugando) paso(); }, juega: juega, gira: gira, pausa: pausa, terminar: terminar, tokens: function () { return S ? S.tokens : []; }, dims: function () { return { COLS: COLS, ROWS: ROWS, CELL: CELL }; } };
+window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, OPC: OPC, cuenta: cuenta, voz: conVoz,
+  sinMundos: function () { MUNDOS = null; $('inicioMundos').innerHTML = ''; }, cumple: cumple, BANCO: BANCO, estado: function () { return S; }, paso: function () { if (S && jugando) paso(); }, juega: juega, gira: gira, pausa: pausa, terminar: terminar, tokens: function () { return S ? S.tokens : []; }, dims: function () { return { COLS: COLS, ROWS: ROWS, CELL: CELL }; } };
 }());
 </script>
+<script src="graduacion.js"></script>
 <script>
 /* Snake de palabras · lo que añade la versión pública (ColmenIA) al juego de Fönia.
    No toca el juego: usa lo que este deja a mano en window.__snake.
@@ -845,9 +1117,9 @@ window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, 
   function ponPropias(lista) {
     /* fuera las de antes, dentro las nuevas (las que el banco ya tiene no se repiten) */
     for (var k = G.BANCO.length - 1; k >= 0; k--) if (G.BANCO[k].propia) G.BANCO.splice(k, 1);
-    var ya = {}; G.BANCO.forEach(function (p) { ya[p.w] = 1; });
+    var ya = {}; G.BANCO.forEach(function (p) { p.suya = false; ya[p.w] = p; });
     PROPIAS = lista.slice();
-    lista.forEach(function (w) { if (!ya[w]) G.BANCO.push({ w: w, n: silabas(w), k: norm(w), propia: true }); });
+    lista.forEach(function (w) { if (!ya[w]) G.BANCO.push({ w: w, n: silabas(w), k: norm(w), propia: true }); else ya[w].suya = true; });
   }
   ponPropias(limpiaLista(QS.get('extra')));
 
@@ -856,6 +1128,8 @@ window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, 
   if (!FIJADO) { velo('vInicio', false); velo('vPortada', true); }
   $('pJugar').onclick = function () { velo('vPortada', false); G.muestraInicio(); };
   $('pPrepara').onclick = function () { abrePrepara(); };
+  $('pOido').onclick = function () { E.audio = true; E.regla = 'empieza'; E.letra = 'b'; abrePrepara(); };
+  (function () { var op = document.createElement('option'); op.value = 'conocidas'; op.textContent = 'Solo con las letras que conoce'; $('aRegla').appendChild(op); })();
 
   /* ---------- prepara la partida ---------- */
   var OBJ = [
@@ -870,55 +1144,92 @@ window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, 
     ['l', 'Ele', 'luna, leche, libro…', 'empieza', 'l'],
     ['s2', 'Palabras de 2 sílabas', 'contar golpes de voz', 'silabas', '', 2],
     ['s3', 'Palabras de 3 sílabas', 'contar golpes de voz', 'silabas', '', 3],
+    ['conoce', 'Las letras que ya conoce', 'tú eliges cuáles: a, m, e, o, s, p, n…', 'conocidas', ''],
+    ['oido', 'A oído: b/d, p/t, s/z…', 'la serpiente busca audios, no palabras', 'empieza', 'b', 0, 'audio'],
+    ['larga', 'Palabras largas', '3 o más sílabas', 'larga', ''],
+    ['trabada', 'Sílabas trabadas', 'pla, tre, bra…', 'trabada', ''],
+    ['parecida', 'Palabras que se parecen', 'solo vale la que se pide', 'parecida', ''],
+    ['espejo', 'Espejo dentro de la palabra', 'b/d y p/q, solo vale la pedida', 'espejo', ''],
+    ['real', '¿Existe o es inventada?', 'palabra real frente a inventada', 'real', ''],
+    ['ortografia', '¿Bien escrita?', 'b/v, ll/y, h, s/z', 'ortografia', ''],
     ['todas', 'Leer y comer todas', 'solo lectura, sin intrusas', 'todas', '']
   ];
+  var SIMBOLOS = 'a b c ch d e f g h i j k l ll m n ñ o p q r rr s t u v w x y z'.split(' ');
+  var GENERADAS = ['parecida', 'espejo', 'real', 'ortografia'], OIDO_OK = ['empieza', 'contiene', 'termina', 'silabas', 'todas', 'larga', 'trabada'];
   var LETRAS = 'a b c d e f g h j l m n ñ p q r rr s t v z ch ll'.split(' ');
-  var E = { regla: O.regla, letra: O.letra, silabas: O.silabas, meta: O.meta, nivel: O.nivel || 0, velocidad: O.velocidad === 'lenta' ? 'lenta' : '' };
+  var E = { regla: O.regla, letra: O.letra, silabas: O.silabas, meta: O.meta, nivel: O.nivel || 0, velocidad: O.velocidad === 'lenta' ? 'lenta' : '',
+    conoce: O.conoce.slice(), directas: !!O.directas, soloPropias: !!O.soloPropias, audio: !!O.audio };
   function reglaDe(e) {
     var L = String(e.letra).toUpperCase();
-    if (e.regla === 'empieza') return 'las que EMPIEZAN por ' + L;
-    if (e.regla === 'contiene') return 'las que CONTIENEN ' + L;
-    if (e.regla === 'termina') return 'las que TERMINAN en ' + L;
-    if (e.regla === 'silabas') return e.silabas >= 4 ? 'las de 4 o más sílabas' : 'las de ' + e.silabas + ' sílaba' + (e.silabas === 1 ? '' : 's');
-    return 'todas las palabras';
+    var r;
+    if (e.regla === 'empieza') r = 'las que EMPIEZAN por ' + L;
+    else if (e.regla === 'contiene') r = 'las que CONTIENEN ' + L;
+    else if (e.regla === 'termina') r = 'las que TERMINAN en ' + L;
+    else if (e.regla === 'silabas') r = e.silabas >= 4 ? 'las de 4 o más sílabas' : 'las de ' + e.silabas + ' sílaba' + (e.silabas === 1 ? '' : 's');
+    else if (e.regla === 'conocidas') r = 'las que se leen con ' + e.conoce.join(' ');
+    else if (e.regla === 'larga') r = 'las de 3 o más sílabas';
+    else if (e.regla === 'trabada') r = 'las que tienen sílaba trabada (pla, tre, bra…)';
+    else if (e.regla === 'parecida') r = 'la palabra que se pide entre otras que se le parecen';
+    else if (e.regla === 'espejo') r = 'la palabra que se pide entre otras con b/d o p/q cambiadas';
+    else if (e.regla === 'real') r = 'las que existen (no las inventadas)';
+    else if (e.regla === 'ortografia') r = 'las bien escritas';
+    else r = 'todas las palabras';
+    if (e.directas && GENERADAS.indexOf(e.regla) < 0) r += ', solo con sílabas directas';
+    if (e.soloPropias && GENERADAS.indexOf(e.regla) < 0) r += ', solo de tus palabras';
+    if (e.audio && OIDO_OK.indexOf(e.regla) >= 0) r += ', escuchando (a oído)';
+    return r;
   }
-  function cuantasHay(e) {
-    var l = norm(e.letra), n = 0;
-    G.BANCO.forEach(function (p) {
-      var k = p.k, v = e.regla === 'empieza' ? k.indexOf(l) === 0 : e.regla === 'contiene' ? k.indexOf(l) >= 0 :
-        e.regla === 'termina' ? (k.length >= l.length && k.lastIndexOf(l) === k.length - l.length) :
-          e.regla === 'silabas' ? (e.silabas >= 4 ? p.n >= 4 : p.n === e.silabas) : true;
-      if (v) n++;
+  function cuantasHay(e) { return G.cuenta(e); }
+  function pintaConoce() {
+    var c = $('prConoce'); c.innerHTML = '';
+    SIMBOLOS.forEach(function (l) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = l; var on = E.conoce.indexOf(l) >= 0; b.className = on ? 'on' : ''; b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.onclick = function () { var k = E.conoce.indexOf(l); if (k >= 0) E.conoce.splice(k, 1); else E.conoce.push(l); pintaPrepara(); };
+      c.appendChild(b);
     });
-    return n;
   }
   function pintaPrepara() {
     var c = $('prObjs'); c.innerHTML = '';
+    if (GENERADAS.indexOf(E.regla) >= 0 || OIDO_OK.indexOf(E.regla) < 0) E.audio = E.audio && OIDO_OK.indexOf(E.regla) >= 0;
     OBJ.forEach(function (o) {
       var b = document.createElement('button'); b.type = 'button';
-      var on = o[3] === E.regla && (o[3] === 'silabas' ? o[5] === E.silabas : (o[3] === 'todas' || o[4] === E.letra));
+      var on = o[3] === E.regla && (o[3] === 'silabas' ? o[5] === E.silabas : (['todas', 'conocidas', 'larga', 'trabada', 'parecida', 'espejo', 'real', 'ortografia'].indexOf(o[3]) >= 0 || o[4] === E.letra)) && !!o[6] === !!E.audio;
       b.className = on ? 'on' : '';
       b.appendChild(document.createTextNode(o[1]));
       var s = document.createElement('small'); s.textContent = o[2]; b.appendChild(s);
-      b.onclick = function () { E.regla = o[3]; if (o[4]) E.letra = o[4]; if (o[5]) E.silabas = o[5]; pintaPrepara(); };
+      b.onclick = function () { E.regla = o[3]; if (o[4]) E.letra = o[4]; if (o[5]) E.silabas = o[5]; E.audio = !!o[6]; pintaPrepara(); };
       c.appendChild(b);
     });
     $('prRegla').value = E.regla; $('prSil').value = String(E.silabas); $('prMeta').value = String(E.meta);
     $('prNivel').value = E.nivel ? String(E.nivel) : 'auto'; $('prVel').value = E.velocidad;
     var sl = $('prLetra'); if (!sl.options.length) LETRAS.forEach(function (l) { var op = document.createElement('option'); op.value = l; op.textContent = l.toUpperCase(); sl.appendChild(op); });
     sl.value = E.letra;
-    $('prCLetra').style.display = (E.regla === 'silabas' || E.regla === 'todas') ? 'none' : '';
+    var conLetra = ['empieza', 'contiene', 'termina'].indexOf(E.regla) >= 0;
+    $('prCLetra').style.display = conLetra ? '' : 'none';
     $('prCSil').style.display = E.regla === 'silabas' ? '' : 'none';
-    var n = cuantasHay(E);
-    $('prResumen').textContent = (E.regla === 'todas' ? 'La serpiente come todas las palabras' : 'La serpiente come solo ' + reglaDe(E)) + ' · tandas de ' + E.meta +
-      (E.regla === 'todas' ? '' : ' · ' + n + ' palabra' + (n === 1 ? '' : 's') + ' que valen' + (n < 4 ? ' (pocas: añade palabras tuyas o cambia la regla)' : ''));
+    $('prCConoce').style.display = E.regla === 'conocidas' ? '' : 'none';
+    if (E.regla === 'conocidas') pintaConoce();
+    var generada = GENERADAS.indexOf(E.regla) >= 0, oidoPosible = OIDO_OK.indexOf(E.regla) >= 0;
+    $('prDirectas').checked = !!E.directas; $('prDirectas').disabled = generada;
+    $('prSolo').checked = !!E.soloPropias; $('prSolo').disabled = generada;
+    $('prAudio').checked = !!E.audio && oidoPosible; $('prAudio').disabled = !oidoPosible;
+    $('prAudioNota').textContent = oidoPosible ? '' : 'El modo oído no vale con esta regla: se juzga mirando cómo está escrita la palabra.';
+    var n = generada ? -1 : cuantasHay(E), ent = reglaDe(E);
+    var texto = (E.regla === 'todas' ? 'La serpiente come todas las palabras' : 'La serpiente come solo ' + ent) + ' · tandas de ' + E.meta;
+    if (E.regla === 'todas' && (E.directas || E.soloPropias || E.audio)) texto = 'La serpiente come todas las palabras que cumplen: ' + ent.replace(/^todas las palabras, ?/, '') + ' · tandas de ' + E.meta;
+    if (generada) texto += ' · el juego fabrica las palabras que se parecen, no hace falta nada más';
+    else if (E.regla !== 'todas' || E.directas || E.soloPropias || E.audio) texto += ' · ' + n + ' palabra' + (n === 1 ? '' : 's') + ' que valen' + (n < 4 ? ' (pocas: añade palabras tuyas o cambia la regla)' : '');
+    if (E.soloPropias && !PROPIAS.length) texto += ' · escribe tus palabras en el paso 3';
+    if (E.audio && oidoPosible) texto += ' · solo suenan las que tienen voz (las tuyas no)';
+    $('prResumen').textContent = texto;
     $('prEnlace').className = 'enlace';
   }
   function leeFormulario() {
     E.regla = $('prRegla').value; E.letra = $('prLetra').value; E.silabas = parseInt($('prSil').value, 10);
     E.meta = parseInt($('prMeta').value, 10); E.nivel = $('prNivel').value === 'auto' ? 0 : parseInt($('prNivel').value, 10); E.velocidad = $('prVel').value;
+    E.directas = $('prDirectas').checked; E.soloPropias = $('prSolo').checked; E.audio = $('prAudio').checked;
   }
-  ['prRegla', 'prLetra', 'prSil', 'prMeta', 'prNivel', 'prVel'].forEach(function (id) { $(id).onchange = function () { leeFormulario(); pintaPrepara(); }; });
+  ['prRegla', 'prLetra', 'prSil', 'prMeta', 'prNivel', 'prVel', 'prDirectas', 'prSolo', 'prAudio'].forEach(function (id) { $(id).onchange = function () { leeFormulario(); pintaPrepara(); }; });
   $('prPropias').onchange = function () { ponPropias(limpiaLista($('prPropias').value)); pintaPrepara(); };
   function abrePrepara() {
     velo('vPortada', false); velo('vInicio', false); velo('vFin', false);
@@ -928,14 +1239,26 @@ window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, 
   function aplica() {
     leeFormulario(); ponPropias(limpiaLista($('prPropias').value));
     O.regla = E.regla; O.letra = E.letra; O.silabas = E.silabas; O.meta = E.meta; O.nivel = E.nivel; O.velocidad = E.velocidad || null;
-    try { localStorage.setItem('fonia-snake-opc', JSON.stringify({ regla: O.regla, letra: O.letra, silabas: O.silabas, meta: O.meta, nivel: O.nivel })); } catch (e) { }
+    O.conoce = E.conoce.length ? E.conoce.slice() : ['a', 'm', 'e', 'o', 's', 'p', 'n']; O.directas = !!E.directas && GENERADAS.indexOf(E.regla) < 0; O.soloPropias = !!E.soloPropias && GENERADAS.indexOf(E.regla) < 0; O.audio = !!E.audio && OIDO_OK.indexOf(E.regla) >= 0;
+    G.sinMundos();
+    try { if (['conocidas', 'parecida', 'espejo', 'real', 'ortografia'].indexOf(O.regla) < 0) localStorage.setItem('fonia-snake-opc', JSON.stringify({ regla: O.regla, letra: O.letra, silabas: O.silabas, meta: O.meta, nivel: O.nivel })); } catch (e) { }
   }
-  $('prJugar').onclick = function () { aplica(); velo('vPrepara', false); G.hud(); G.muestraInicio(); suma('snake_partida_preparada'); };
+  $('prJugar').onclick = function () {
+    aplica(); velo('vPrepara', false); G.hud(); G.muestraInicio(); suma('snake_partida_preparada');
+    if (O.audio && G.OPC.regla !== 'parecida') suma('snake_modo_oido');
+    if (O.regla === 'conocidas') suma('snake_modo_conocidas');
+    if (O.directas) suma('snake_modo_directas');
+    if (O.soloPropias) suma('snake_modo_solo_propias');
+  };
   $('prVolver').onclick = function () { velo('vPrepara', false); velo('vPortada', true); };
   function enlaceFamilia() {
     var p = ['filtro=' + E.regla];
-    if (E.regla !== 'silabas' && E.regla !== 'todas') p.push('letra=' + encodeURIComponent(E.letra));
+    if (['empieza', 'contiene', 'termina'].indexOf(E.regla) >= 0) p.push('letra=' + encodeURIComponent(E.letra));
     if (E.regla === 'silabas') p.push('silabas=' + E.silabas);
+    if (E.regla === 'conocidas') p.push('conoce=' + encodeURIComponent(E.conoce.join(',')));
+    if (E.directas && GENERADAS.indexOf(E.regla) < 0) p.push('directas=1');
+    if (E.soloPropias && GENERADAS.indexOf(E.regla) < 0) p.push('solo=1');
+    if (E.audio && OIDO_OK.indexOf(E.regla) >= 0) p.push('modo=audio');
     p.push('meta=' + E.meta);
     if (E.nivel) p.push('nivel=' + E.nivel);
     if (E.velocidad) p.push('velocidad=' + E.velocidad);
