@@ -24,7 +24,7 @@ def cambia(viejo, nuevo, veces=1):
 
 # --- cabecera ---
 cambia('<title>Snake de palabras · Gabinete Fönia</title>',
-       '<title>Snake de palabras · ColmenIA</title>\n'
+       '<title>Snake de palabras · Versión 2 · ColmenIA</title>\n'
        '<meta name="description" content="Juego de lectura: la serpiente solo come las palabras que cumplen la regla (empiezan por R, tienen dos sílabas…). Hecho en el laboratorio de Gabinete Fönia, lo entrega ColmenIA.">\n'
        '<meta property="og:title" content="Snake de palabras · juego de lectura">\n'
        '<meta property="og:description" content="La serpiente solo come las palabras que cumplen la regla. Tú eliges la regla.">\n'
@@ -138,7 +138,7 @@ def idea(donde):
 
 PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta conportada">
       <img class="heroe" src="portada/portada-ancha.jpg" width="1280" height="720" alt="Una serpiente verde va hacia la palabra RANA y deja a un lado luna, mesa y pato">
-      <h1>Snake de palabras</h1>
+      <h1>Snake de palabras <span class="version">Versión 2</span></h1>
       <p class="lema">La serpiente solo come las palabras que cumplen <b>tu regla</b>. Y al acabar te dice qué letras confunde.</p>
       <button class="btnimg" id="pJugar" type="button" aria-label="Jugar ya"><img class="normal" src="portada/boton-jugar.png" width="720" height="280" alt=""><img class="pulsado" src="portada/boton-jugar-pulsado.png" width="720" height="280" alt=""></button>
       <button class="btn s ancho" id="pPrepara" type="button">🧑‍⚕️ Preparar una partida<small>Elige el objetivo y manda el enlace a la familia</small></button>

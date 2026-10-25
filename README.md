@@ -1,4 +1,4 @@
-# Snake de palabras
+# Snake de palabras · Versión 2
 
 Juego de lectura. La serpiente solo debe comer las palabras que cumplen la regla
 (empiezan por R, contienen una letra, terminan en…, tienen dos sílabas). Si come una que no la

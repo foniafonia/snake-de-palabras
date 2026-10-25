@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0F3D2A">
-<title>Snake de palabras · ColmenIA</title>
+<title>Snake de palabras · Versión 2 · ColmenIA</title>
 <meta name="description" content="Juego de lectura: la serpiente solo come las palabras que cumplen la regla (empiezan por R, tienen dos sílabas…). Hecho en el laboratorio de Gabinete Fönia, lo entrega ColmenIA.">
 <meta property="og:title" content="Snake de palabras · juego de lectura">
 <meta property="og:description" content="La serpiente solo come las palabras que cumplen la regla. Tú eliges la regla.">
@@ -171,6 +171,8 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
 .op{display:flex;align-items:flex-start;gap:10px;margin:8px 0;font-size:16px;line-height:1.3;cursor:pointer}
 .op input{width:22px;height:22px;margin-top:1px;flex:none}
 #prConoce button{width:44px}
+
+.version{display:inline-block;vertical-align:middle;margin-left:6px;padding:3px 10px;border-radius:999px;background:var(--oro);color:var(--tinta);font:700 14px/1.2 var(--titulo);letter-spacing:.02em}
 </style>
 </head>
 <body>
@@ -191,7 +193,7 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
 
     <div class="velo" id="vPortada"><div class="tarjeta conportada">
       <img class="heroe" src="portada/portada-ancha.jpg" width="1280" height="720" alt="Una serpiente verde va hacia la palabra RANA y deja a un lado luna, mesa y pato">
-      <h1>Snake de palabras</h1>
+      <h1>Snake de palabras <span class="version">Versión 2</span></h1>
       <p class="lema">La serpiente solo come las palabras que cumplen <b>tu regla</b>. Y al acabar te dice qué letras confunde.</p>
       <button class="btnimg" id="pJugar" type="button" aria-label="Jugar ya"><img class="normal" src="portada/boton-jugar.png" width="720" height="280" alt=""><img class="pulsado" src="portada/boton-jugar-pulsado.png" width="720" height="280" alt=""></button>
       <button class="btn s ancho" id="pPrepara" type="button">🧑‍⚕️ Preparar una partida<small>Elige el objetivo y manda el enlace a la familia</small></button>
