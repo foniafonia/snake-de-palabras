@@ -669,7 +669,9 @@ function suenaFicha(t) {
   if (!t) return;
   t.suena = Date.now(); t.oido = t.suena; ultSuena = t.suena; oyendo = t;
   dicePalabra(t.p.w);
-  setTimeout(function () { if (oyendo === t) oyendo = null; }, 1200);
+  var libera = function () { if (oyendo === t) { oyendo = null; ultSuena = Date.now(); } };
+  try { if (audioPalabra) audioPalabra.onended = libera; } catch (e) { }
+  setTimeout(libera, 2200);
 }
 function fichaCercana() {
   var h = S.snake[0], mejor = null, dm = 99, k, t, d;
@@ -681,13 +683,14 @@ function fichaCercana() {
   return { t: mejor, d: dm };
 }
 function turnoOido() {
-  if (!S || !jugando || pausado || !S.tokens.length || !audioOn()) return;
-  var ahora = Date.now(), c = fichaCercana(), k, t, viejo = null;
-  if (ahora - ultSuena < 1400) return;
-  if (c.t && c.d <= 3 && ahora - (c.t.oido || 0) > 4500) { suenaFicha(c.t); return; }
-  if (ahora - ultSuena < 2600) return;
-  for (k = 0; k < S.tokens.length; k++) { t = S.tokens[k]; if (!viejo || (t.oido || 0) < (viejo.oido || 0)) viejo = t; }
-  suenaFicha(viejo);
+  if (!S || !jugando || pausado || !S.tokens.length || !audioOn() || oyendo) return;
+  var ahora = Date.now(), c = fichaCercana(), k, t, nueva = null;
+  if (ahora - ultSuena < 700) return;
+  /* la cabeza se acerca a una ficha: suena otra vez, para decidir (solo si ya pasó un rato desde que sonó) */
+  if (c.t && c.d <= 2 && ahora - (c.t.oido || 0) > 3500) { suenaFicha(c.t); return; }
+  /* cada ficha nueva suena una vez, de una en una; después se queda en silencio hasta que la cabeza se acerque o se pulse 🎧 */
+  for (k = 0; k < S.tokens.length; k++) { t = S.tokens[k]; if (!t.oido && (!nueva || t.nace < nueva.nace)) nueva = t; }
+  if (nueva) suenaFicha(nueva);
 }
 $('bOir').onclick = function () { if (S && S.tokens.length && audioOn()) { var c = fichaCercana(); if (c.t) { if (!sonido) { sonido = true; $('bSonido').textContent = '🔊'; } suenaFicha(c.t); } } };
 
@@ -800,16 +803,24 @@ function pintaCuerpo(pts, sx, sy) {
 function dibujaToken(t) {
   var x0 = OX + t.cells[0].x * CELL, y0 = OY + t.cells[0].y * CELL, w = t.cells.length * CELL, h = CELL;
   var bob = REDUCE ? 0 : Math.sin(hora / 520 + t.fase) * 2.5, edad = Math.min(1, (Date.now() - t.nace) / 260), esc = REDUCE ? 1 : (0.6 + 0.4 * (1 - Math.pow(1 - edad, 3)));
-  cx.save(); cx.translate(x0 + w / 2, y0 + h / 2 + bob); cx.scale(esc, esc); cx.translate(-w / 2, -h / 2);
+  var hab = audioOn() && oyendo === t, apag = audioOn() && oyendo && oyendo !== t;
+  if (hab) esc *= REDUCE ? 1.15 : 1.15 + 0.05 * Math.sin(hora / 110);
+  cx.save(); if (apag) cx.globalAlpha = 0.35; cx.translate(x0 + w / 2, y0 + h / 2 + bob); cx.scale(esc, esc); cx.translate(-w / 2, -h / 2);
   var pad = h * 0.06;
   cx.fillStyle = 'rgba(14,53,36,0.25)'; rr(cx, pad + 1, pad + 5, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill();
   cx.fillStyle = '#FFFFFF'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill();
   cx.strokeStyle = t.color; cx.lineWidth = Math.max(3, CELL * 0.08); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke();
   cx.fillStyle = '#10231A'; cx.font = '700 ' + Math.round(CELL * 0.56) + 'px "Atkinson Hyperlegible",system-ui,sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
   if (audioOn()) {
-    var suena = (Date.now() - (t.suena || 0)) < 1200;
-    if (suena) { cx.fillStyle = '#FFF0B3'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill(); cx.strokeStyle = t.color; cx.lineWidth = Math.max(3, CELL * 0.08); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke(); }
-    cx.fillStyle = '#10231A'; cx.font = Math.round(CELL * (suena ? 0.74 : 0.66)) + 'px Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,system-ui,sans-serif'; cx.fillText(suena ? '🔊' : '🔈', w / 2, h / 2 + 1);
+    if (hab) {
+      cx.fillStyle = '#FFE27A'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill();
+      cx.strokeStyle = '#10231A'; cx.lineWidth = Math.max(4, CELL * 0.11); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke();
+      cx.fillStyle = '#10231A'; cx.font = Math.round(CELL * 0.72) + 'px Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,system-ui,sans-serif'; cx.fillText('🔊', w * 0.34, h / 2 + 1);
+      for (var o = 0; o < 3; o++) { var fase = REDUCE ? 1 : 0.35 + 0.65 * Math.max(0, Math.sin(hora / 160 - o * 0.9)); cx.globalAlpha = fase; cx.beginPath(); cx.arc(w * 0.52, h / 2, CELL * (0.16 + 0.15 * o), -0.7, 0.7); cx.lineWidth = Math.max(3, CELL * 0.08); cx.lineCap = 'round'; cx.stroke(); }
+      cx.globalAlpha = 1;
+    } else {
+      cx.globalAlpha = 0.6; cx.fillStyle = '#10231A'; cx.font = Math.round(CELL * 0.6) + 'px Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,system-ui,sans-serif'; cx.fillText('🔈', w / 2, h / 2 + 1);
+    }
   } else cx.fillText(t.p.w, w / 2, h / 2 + 1);
   cx.restore();
 }

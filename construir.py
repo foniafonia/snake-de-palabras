@@ -105,11 +105,21 @@ cambia("  var pool = BANCO.filter(function (p) { return !usados[p.w] && (cumple(
        "  if (!pool.length) pool = BJ.filter(function (p) { return cumple(p) === ok && !S.tokens.some(function (t) { return t.p.w === p.w; }); });")
 cambia("/* ====================== mover ====================== */", (AQUI / 'ampliacion-juego.js').read_text(encoding='utf-8') + "/* ====================== mover ====================== */")
 cambia("  celdas = Math.min(celdas, COLS - 2);\n", "  celdas = Math.min(celdas, COLS - 2);\n  if (audioOn()) celdas = 2;\n")
+cambia("  cx.save(); cx.translate(x0 + w / 2, y0 + h / 2 + bob); cx.scale(esc, esc);",
+       "  var hab = audioOn() && oyendo === t, apag = audioOn() && oyendo && oyendo !== t;\n"
+       "  if (hab) esc *= REDUCE ? 1.15 : 1.15 + 0.05 * Math.sin(hora / 110);\n"
+       "  cx.save(); if (apag) cx.globalAlpha = 0.35; cx.translate(x0 + w / 2, y0 + h / 2 + bob); cx.scale(esc, esc);")
 cambia("  cx.fillText(t.p.w, w / 2, h / 2 + 1);\n  cx.restore();",
        "  if (audioOn()) {\n"
-       "    var suena = (Date.now() - (t.suena || 0)) < 1200;\n"
-       "    if (suena) { cx.fillStyle = '#FFF0B3'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill(); cx.strokeStyle = t.color; cx.lineWidth = Math.max(3, CELL * 0.08); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke(); }\n"
-       "    cx.fillStyle = '#10231A'; cx.font = Math.round(CELL * (suena ? 0.74 : 0.66)) + 'px Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,system-ui,sans-serif'; cx.fillText(suena ? '🔊' : '🔈', w / 2, h / 2 + 1);\n"
+       "    if (hab) {\n"
+       "      cx.fillStyle = '#FFE27A'; rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.fill();\n"
+       "      cx.strokeStyle = '#10231A'; cx.lineWidth = Math.max(4, CELL * 0.11); rr(cx, pad, pad, w - 2 * pad, h - 2 * pad, h * 0.32); cx.stroke();\n"
+       "      cx.fillStyle = '#10231A'; cx.font = Math.round(CELL * 0.72) + 'px Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,system-ui,sans-serif'; cx.fillText('🔊', w * 0.34, h / 2 + 1);\n"
+       "      for (var o = 0; o < 3; o++) { var fase = REDUCE ? 1 : 0.35 + 0.65 * Math.max(0, Math.sin(hora / 160 - o * 0.9)); cx.globalAlpha = fase; cx.beginPath(); cx.arc(w * 0.52, h / 2, CELL * (0.16 + 0.15 * o), -0.7, 0.7); cx.lineWidth = Math.max(3, CELL * 0.08); cx.lineCap = 'round'; cx.stroke(); }\n"
+       "      cx.globalAlpha = 1;\n"
+       "    } else {\n"
+       "      cx.globalAlpha = 0.6; cx.fillStyle = '#10231A'; cx.font = Math.round(CELL * 0.6) + 'px Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,system-ui,sans-serif'; cx.fillText('🔈', w / 2, h / 2 + 1);\n"
+       "    }\n"
        "  } else cx.fillText(t.p.w, w / 2, h / 2 + 1);\n  cx.restore();")
 cambia("  avanzaEfectos(dt); dibuja(alfa);", "  turnoOido(); avanzaEfectos(dt); dibuja(alfa);")
 cambia("    nuevaPartida(); jugando = true; pausado = false;",

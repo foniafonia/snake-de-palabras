@@ -70,7 +70,9 @@ function suenaFicha(t) {
   if (!t) return;
   t.suena = Date.now(); t.oido = t.suena; ultSuena = t.suena; oyendo = t;
   dicePalabra(t.p.w);
-  setTimeout(function () { if (oyendo === t) oyendo = null; }, 1200);
+  var libera = function () { if (oyendo === t) { oyendo = null; ultSuena = Date.now(); } };
+  try { if (audioPalabra) audioPalabra.onended = libera; } catch (e) { }
+  setTimeout(libera, 2200);
 }
 function fichaCercana() {
   var h = S.snake[0], mejor = null, dm = 99, k, t, d;
@@ -82,13 +84,14 @@ function fichaCercana() {
   return { t: mejor, d: dm };
 }
 function turnoOido() {
-  if (!S || !jugando || pausado || !S.tokens.length || !audioOn()) return;
-  var ahora = Date.now(), c = fichaCercana(), k, t, viejo = null;
-  if (ahora - ultSuena < 1400) return;
-  if (c.t && c.d <= 3 && ahora - (c.t.oido || 0) > 4500) { suenaFicha(c.t); return; }
-  if (ahora - ultSuena < 2600) return;
-  for (k = 0; k < S.tokens.length; k++) { t = S.tokens[k]; if (!viejo || (t.oido || 0) < (viejo.oido || 0)) viejo = t; }
-  suenaFicha(viejo);
+  if (!S || !jugando || pausado || !S.tokens.length || !audioOn() || oyendo) return;
+  var ahora = Date.now(), c = fichaCercana(), k, t, nueva = null;
+  if (ahora - ultSuena < 700) return;
+  /* la cabeza se acerca a una ficha: suena otra vez, para decidir (solo si ya pasó un rato desde que sonó) */
+  if (c.t && c.d <= 2 && ahora - (c.t.oido || 0) > 3500) { suenaFicha(c.t); return; }
+  /* cada ficha nueva suena una vez, de una en una; después se queda en silencio hasta que la cabeza se acerque o se pulse 🎧 */
+  for (k = 0; k < S.tokens.length; k++) { t = S.tokens[k]; if (!t.oido && (!nueva || t.nace < nueva.nace)) nueva = t; }
+  if (nueva) suenaFicha(nueva);
 }
 $('bOir').onclick = function () { if (S && S.tokens.length && audioOn()) { var c = fichaCercana(); if (c.t) { if (!sonido) { sonido = true; $('bSonido').textContent = '🔊'; } suenaFicha(c.t); } } };
 
