@@ -108,6 +108,7 @@ cambia("function dicePalabra(w) {", "function dicePalabraVieja(w) {")
 cambia("if (actx.state === 'suspended' && actx.resume) actx.resume(); } catch (e) { actx = null; } }",
        "if ((actx.state === 'suspended' || actx.state === 'interrupted') && actx.resume) actx.resume();\n"
        "    if (!actx.abierto) { actx.abierto = 1; var b0 = actx.createBuffer(1, 1, 22050), z0 = actx.createBufferSource(); z0.buffer = b0; z0.connect(actx.destination); z0.start(0); } } catch (e) { actx = null; } }")
+cambia("function cumple(p) {\n  var l = norm(OPC.letra), k = p.k;\n", "function cumple(p) {\n  var l = norm(OPC.letra), k = p.k;\n  if (audioOn() && ['empieza', 'contiene', 'termina'].indexOf(OPC.regla) >= 0) return cumplePorSonido(p);\n")
 cambia("/* ====================== mover ====================== */", (AQUI / 'ampliacion-juego.js').read_text(encoding='utf-8') + "/* ====================== mover ====================== */")
 cambia("  celdas = Math.min(celdas, COLS - 2);\n", "  celdas = Math.min(celdas, COLS - 2);\n  if (audioOn()) { celdas = 2; precargaVoz(p.w); }\n")
 cambia("  cx.save(); cx.translate(x0 + w / 2, y0 + h / 2 + bob); cx.scale(esc, esc);",

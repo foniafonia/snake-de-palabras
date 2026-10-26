@@ -38,6 +38,7 @@ function BANCO_JUEGO(estricto) {
   var oido = audioOn();
   var l = BANCO.filter(function (p) {
     if (oido && !conVoz(p.w)) return false;
+    if (oido && ['empieza', 'contiene', 'termina'].indexOf(OPC.regla) >= 0 && dudosaPorSonido(p)) return false;
     if (OPC.soloPropias && !(p.propia || p.suya)) return false;
     if (OPC.directas && !directa(p.w)) return false;
     return true;
@@ -99,6 +100,34 @@ function dicePalabra(w) {
       fuenteVoz = f; f.start(0);
     } catch (e) { vozHtml(vozUrl(w)); }
   }, function () { if (mi === vozN) vozHtml(vozUrl(w)); });
+}
+
+/* ---------- cómo suena (modo oído) ----------
+   Por el oído, «queso» empieza igual que «casa» (k) y «hielo» no empieza por h: eso vale para todos los hablantes.
+   Otros pares no suenan igual en todas partes: b/v (hay quien los distingue), s/z/ce/ci (con o sin seseo) y ll/y
+   (con o sin yeísmo). Con esos pares el juego NO decide: las palabras dudosas salen del tablero, ni suman ni
+   restan, para no decirle a nadie que se equivoca por algo que depende de cómo habla. */
+function limpiaFon(s) {
+  return String(s).toLowerCase().replace(/[áàä]/g, 'a').replace(/[éèë]/g, 'e').replace(/[íìï]/g, 'i').replace(/[óòö]/g, 'o').replace(/[úùü]/g, 'u')
+    .replace(/ch/g, '#').replace(/rr/g, 'r').replace(/qu/g, 'k').replace(/gu(?=[ei])/g, 'G').replace(/g(?=[ei])/g, 'j')
+    .replace(/G/g, 'g').replace(/[cq]/g, function () { return 'c'; }).replace(/h/g, '').replace(/w/g, 'v');
+}
+/* estricto: cada letra de los pares dudosos cuenta por separado; suave: se juntan */
+function fonEstricta(s) { return limpiaFon(s).replace(/ll/g, 'L').replace(/c(?=[ei])/g, 'z').replace(/c/g, 'k'); }
+function fonSuave(s) { return fonEstricta(s).replace(/v/g, 'b').replace(/z/g, 's').replace(/L/g, 'y'); }
+function coincide(f, lf, regla) {
+  if (!lf) return false;
+  if (regla === 'empieza') return f.indexOf(lf) === 0;
+  if (regla === 'contiene') return f.indexOf(lf) >= 0;
+  return f.length >= lf.length && f.lastIndexOf(lf) === f.length - lf.length;
+}
+function cumplePorSonido(p) {
+  var fe = p.fe || (p.fe = fonEstricta(p.w));
+  return coincide(fe, fonEstricta(OPC.letra), OPC.regla);
+}
+function dudosaPorSonido(p) {
+  var fe = p.fe || (p.fe = fonEstricta(p.w)), fs = p.fs || (p.fs = fonSuave(p.w));
+  return coincide(fs, fonSuave(OPC.letra), OPC.regla) !== coincide(fe, fonEstricta(OPC.letra), OPC.regla);
 }
 
 /* ---------- modo oído ---------- */
