@@ -164,6 +164,7 @@ PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta conportada"
       """ + idea('idea_portada') + """
       <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>
       <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda.</p>
+      <p class="nota">Las reglas de palabras parecidas, letras espejo, existe o inventada y bien escrita están en pruebas, sin revisión clínica. El informe orienta: no evalúa ni diagnostica.</p>
       <p class="nota">Sin registro. Los resultados no salen de este aparato si no los compartes tú. Solo se cuenta, de forma anónima, cuánta gente lo usa. <a href="privacidad.html">Privacidad</a></p>
     </div></div>
 
@@ -210,7 +211,8 @@ PORTADA = """    <div class="velo" id="vPortada"><div class="tarjeta conportada"
 cambia('    <div class="velo on" id="vInicio"><div class="tarjeta">', PORTADA + '    <div class="velo on" id="vInicio"><div class="tarjeta">')
 cambia('      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Pendiente de revisión clínica.</p>',
        '      <p class="firma">Laboratorio: Gabinete Fönia · Lo entrega: ColmenIA</p>\n'
-       '      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda.</p>')
+       '      <p class="nota">Voz: Piper (Open Home Foundation), licencia CC BY 3.0. Material de apoyo: no sustituye a la logopeda.</p>\n'
+       '      <p class="nota">Las reglas de palabras parecidas, letras espejo, existe o inventada y bien escrita están en pruebas, sin revisión clínica. El informe orienta: no evalúa ni diagnostica.</p>')
 cambia('      <p class="nota" id="finEnvio"></p>\n      <button class="btn" id="bOtra" type="button">▶ Otra tanda</button>',
        '      <div class="informe"><h2>📋 Informe de la tanda</h2><dl id="infFilas"></dl>\n'
        '        <div class="minis"><button class="btn mini" id="infCompartir" type="button">📤 Enviar a mi logopeda</button><button class="btn s mini" id="infCopiar" type="button">📋 Copiar</button></div>\n'
