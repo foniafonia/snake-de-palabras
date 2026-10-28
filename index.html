@@ -1407,6 +1407,23 @@ window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, 
   else setInterval(mira, 500);
   if (FIJADO) $('finPrepara').style.display = 'none';
 })();
+/* ---------- de qué canal llega la gente (28/10/2026) ----------
+   Si el enlace trae ?c=sk (Skool), ?c=wa (WhatsApp)…, se suma de forma anónima cuántas aperturas, aparatos distintos y partidas
+   vienen de ese canal. Sin cuentas ni nombres. Respeta «No contar este aparato» y ?yo=1. */
+(function () {
+  try {
+    var p = new URLSearchParams(location.search), c = (p.get('c') || '').toLowerCase().replace(/[^a-z]/g, '').slice(0, 3);
+    if (c) localStorage.setItem('snake-canal', c);
+    var canal = localStorage.getItem('snake-canal') || '';
+    if (!canal || localStorage.getItem('snake-no-contar') === '1' || p.get('yo') === '1') return;
+    var U = 'https://abacus.jasoncameron.dev/hit/foniafonia-juegos/';
+    function hit(k) { try { fetch(U + k, { keepalive: true }).catch(function () { }); } catch (e) { } }
+    if (c) { hit('snake_c_' + c + '_aperturas'); if (!localStorage.getItem('snake-visto-' + c)) { localStorage.setItem('snake-visto-' + c, '1'); hit('snake_c_' + c + '_personas'); } }
+    var cruz = document.getElementById('dpad'), puesta = false;
+    function mira() { var on = !!cruz && cruz.className === 'on'; if (on && !puesta) hit('snake_c_' + canal + '_partidas'); puesta = on; }
+    if (cruz && window.MutationObserver) new MutationObserver(mira).observe(cruz, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) { }
+})();
 </script>
 </body>
 </html>
