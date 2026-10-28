@@ -11,6 +11,7 @@ cumple, el juego dice por qué y se sigue jugando: no hay vidas ni muertes.
 - Pedido por la comunidad (25/10/2026): `&conoce=a,m,e,o,s,p,n` (con `filtro=conocidas`: solo palabras que se leen con esas letras),
   `&directas=1` (solo sílabas directas: ma, pe, si…), `&solo=1` (solo las palabras de `&extra=`) y
   `&modo=audio` (la serpiente busca audios en vez de palabras escritas; solo con las 241 palabras con voz).
+  Ajustes del modo a oído (pedido por una logopeda, 28/10/2026): pausa entre audios (normal, larga, muy larga) y volumen de la voz (normal, alto, más alto); se eligen en el panel al marcar «A oído» y se guardan solo en el aparato.
 - Funciona en móvil, tableta y ordenador. Sin registro; los resultados no salen del aparato.
 - Privacidad, en claro: `privacidad.html`. Cuánta gente lo usa: `estadisticas.html`.
 - Es material de apoyo: no sustituye a la logopeda.

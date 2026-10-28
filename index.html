@@ -229,6 +229,7 @@ html,body{margin:0;height:100%;background:var(--noche);color:var(--crema);font-f
         <label class="op"><input type="checkbox" id="prSolo"> <span><b>Jugar solo con mis palabras</b> (las del paso 3)</span></label>
         <label class="op"><input type="checkbox" id="prAudio"> <span><b>🎧 A oído:</b> la serpiente busca audios, no palabras escritas</span></label>
         <p class="nota" id="prAudioNota" style="text-align:left;margin:2px 0 0"></p>
+        <div class="fila2" id="prOidoAj" style="display:none"><div class="campo"><label for="prPausa">Pausa entre audios</label><select id="prPausa"><option value="700">Normal</option><option value="2000">Larga</option><option value="4000">Muy larga</option></select></div><div class="campo"><label for="prVol">Volumen de la voz</label><select id="prVol"><option value="1">Normal</option><option value="1.6">Alto</option><option value="2.2">Más alto</option></select></div></div>
       </div>
       <h2>3 · Palabras de tu paciente (opcional)</h2>
       <textarea id="prPropias" placeholder="Escribe las tuyas separadas por comas: rueda, ratón, arroz…" aria-label="Palabras propias"></textarea>
@@ -673,9 +674,14 @@ function cuenta(e) {
    El juego ya desbloquea el motor de audio (actx) al tocar: la voz se decodifica una vez y suena por ahí.
    Si el motor no está listo, se usa el elemento de audio de siempre. */
 var VOCES = {}, fuenteVoz = null, finVoz = null, vozN = 0;
+/* ajustes del modo oído (pedido por una logopeda, 28/10): pausa entre audios y volumen de la voz; se guardan solo en este aparato */
+var OIDO_AJ = window.OIDO_AJ = (function () { var o = {}; try { o = JSON.parse(localStorage.getItem('fonia-snake-oido') || '{}') || {}; } catch (e) { }
+  return { pausa: [700, 2000, 4000].indexOf(o.pausa) >= 0 ? o.pausa : 700, vol: [1, 1.6, 2.2].indexOf(o.vol) >= 0 ? o.vol : 1 }; })();
+function guardaOidoAj() { try { localStorage.setItem('fonia-snake-oido', JSON.stringify(OIDO_AJ)); } catch (e) { } }
+window.guardaOidoAj = guardaOidoAj;
 function sueltaVoz() { var f = finVoz; finVoz = null; if (f) { try { f(); } catch (e) { } } }
 function vozHtml(url) {
-  try { if (audioPalabra) audioPalabra.pause(); audioPalabra = new Audio(url); audioPalabra.onended = sueltaVoz; var p = audioPalabra.play(); if (p && p.catch) p.catch(function () { }); } catch (e) { }
+  try { if (audioPalabra) audioPalabra.pause(); audioPalabra = new Audio(url); audioPalabra.volume = Math.min(1, OIDO_AJ.vol); audioPalabra.onended = sueltaVoz; var p = audioPalabra.play(); if (p && p.catch) p.catch(function () { }); } catch (e) { }
 }
 function vozUrl(w) { return 'snake-voz/' + window.VOZ_SNAKE[w] + '.mp3'; }
 function motorListo() { return !!(actx && actx.state === 'running' && window.fetch && actx.decodeAudioData); }
@@ -698,7 +704,7 @@ function dicePalabra(w) {
     try {
       if (fuenteVoz) { fuenteVoz.onended = null; try { fuenteVoz.stop(); } catch (e) { } }
       if (audioPalabra) { try { audioPalabra.pause(); } catch (e) { } }
-      var f = actx.createBufferSource(); f.buffer = buf; f.connect(actx.destination);
+      var f = actx.createBufferSource(), gv = actx.createGain(); f.buffer = buf; gv.gain.value = OIDO_AJ.vol; f.connect(gv); gv.connect(actx.destination);
       f.onended = function () { if (fuenteVoz === f) { fuenteVoz = null; sueltaVoz(); } };
       fuenteVoz = f; f.start(0);
     } catch (e) { vozHtml(vozUrl(w)); }
@@ -756,7 +762,7 @@ function fichaCercana() {
 function turnoOido() {
   if (!S || !jugando || pausado || !S.tokens.length || !audioOn() || oyendo) return;
   var ahora = Date.now(), c = fichaCercana(), k, t, nueva = null;
-  if (ahora - ultSuena < 700) return;
+  if (ahora - ultSuena < OIDO_AJ.pausa) return;
   /* la cabeza se acerca a una ficha: suena otra vez, para decidir (solo si ya pasó un rato desde que sonó) */
   if (c.t && c.d <= 2 && ahora - (c.t.oido || 0) > 3500) { suenaFicha(c.t); return; }
   /* cada ficha nueva suena una vez, de una en una; después se queda en silencio hasta que la cabeza se acerque o se pulse 🎧 */
@@ -1297,6 +1303,7 @@ window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, 
     $('prDirectas').checked = !!E.directas; $('prDirectas').disabled = generada;
     $('prSolo').checked = !!E.soloPropias; $('prSolo').disabled = generada;
     $('prAudio').checked = !!E.audio && oidoPosible; $('prAudio').disabled = !oidoPosible;
+    $('prOidoAj').style.display = $('prAudio').checked ? '' : 'none'; $('prPausa').value = String(OIDO_AJ.pausa); $('prVol').value = String(OIDO_AJ.vol);
     $('prAudioNota').textContent = oidoPosible ? '' : 'El modo oído no vale con esta regla: se juzga mirando cómo está escrita la palabra.';
     var n = generada ? -1 : cuantasHay(E), ent = reglaDe(E);
     var texto = (E.regla === 'todas' ? 'La serpiente come todas las palabras' : 'La serpiente come solo ' + ent) + ' · tandas de ' + E.meta;
@@ -1314,6 +1321,7 @@ window.__snake = { filas: filasPartida, hud: hud, muestraInicio: muestraInicio, 
     E.directas = $('prDirectas').checked; E.soloPropias = $('prSolo').checked; E.audio = $('prAudio').checked;
   }
   ['prRegla', 'prLetra', 'prSil', 'prMeta', 'prNivel', 'prVel', 'prDirectas', 'prSolo', 'prAudio'].forEach(function (id) { $(id).onchange = function () { leeFormulario(); pintaPrepara(); }; });
+  $('prPausa').onchange = $('prVol').onchange = function () { OIDO_AJ.pausa = parseInt($('prPausa').value, 10); OIDO_AJ.vol = parseFloat($('prVol').value); guardaOidoAj(); };
   $('prPropias').onchange = function () { ponPropias(limpiaLista($('prPropias').value)); pintaPrepara(); };
   function abrePrepara() {
     velo('vPortada', false); velo('vInicio', false); velo('vFin', false);

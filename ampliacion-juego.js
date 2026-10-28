@@ -70,9 +70,14 @@ function cuenta(e) {
    El juego ya desbloquea el motor de audio (actx) al tocar: la voz se decodifica una vez y suena por ahí.
    Si el motor no está listo, se usa el elemento de audio de siempre. */
 var VOCES = {}, fuenteVoz = null, finVoz = null, vozN = 0;
+/* ajustes del modo oído (pedido por una logopeda, 28/10): pausa entre audios y volumen de la voz; se guardan solo en este aparato */
+var OIDO_AJ = window.OIDO_AJ = (function () { var o = {}; try { o = JSON.parse(localStorage.getItem('fonia-snake-oido') || '{}') || {}; } catch (e) { }
+  return { pausa: [700, 2000, 4000].indexOf(o.pausa) >= 0 ? o.pausa : 700, vol: [1, 1.6, 2.2].indexOf(o.vol) >= 0 ? o.vol : 1 }; })();
+function guardaOidoAj() { try { localStorage.setItem('fonia-snake-oido', JSON.stringify(OIDO_AJ)); } catch (e) { } }
+window.guardaOidoAj = guardaOidoAj;
 function sueltaVoz() { var f = finVoz; finVoz = null; if (f) { try { f(); } catch (e) { } } }
 function vozHtml(url) {
-  try { if (audioPalabra) audioPalabra.pause(); audioPalabra = new Audio(url); audioPalabra.onended = sueltaVoz; var p = audioPalabra.play(); if (p && p.catch) p.catch(function () { }); } catch (e) { }
+  try { if (audioPalabra) audioPalabra.pause(); audioPalabra = new Audio(url); audioPalabra.volume = Math.min(1, OIDO_AJ.vol); audioPalabra.onended = sueltaVoz; var p = audioPalabra.play(); if (p && p.catch) p.catch(function () { }); } catch (e) { }
 }
 function vozUrl(w) { return 'snake-voz/' + window.VOZ_SNAKE[w] + '.mp3'; }
 function motorListo() { return !!(actx && actx.state === 'running' && window.fetch && actx.decodeAudioData); }
@@ -95,7 +100,7 @@ function dicePalabra(w) {
     try {
       if (fuenteVoz) { fuenteVoz.onended = null; try { fuenteVoz.stop(); } catch (e) { } }
       if (audioPalabra) { try { audioPalabra.pause(); } catch (e) { } }
-      var f = actx.createBufferSource(); f.buffer = buf; f.connect(actx.destination);
+      var f = actx.createBufferSource(), gv = actx.createGain(); f.buffer = buf; gv.gain.value = OIDO_AJ.vol; f.connect(gv); gv.connect(actx.destination);
       f.onended = function () { if (fuenteVoz === f) { fuenteVoz = null; sueltaVoz(); } };
       fuenteVoz = f; f.start(0);
     } catch (e) { vozHtml(vozUrl(w)); }
@@ -153,7 +158,7 @@ function fichaCercana() {
 function turnoOido() {
   if (!S || !jugando || pausado || !S.tokens.length || !audioOn() || oyendo) return;
   var ahora = Date.now(), c = fichaCercana(), k, t, nueva = null;
-  if (ahora - ultSuena < 700) return;
+  if (ahora - ultSuena < OIDO_AJ.pausa) return;
   /* la cabeza se acerca a una ficha: suena otra vez, para decidir (solo si ya pasó un rato desde que sonó) */
   if (c.t && c.d <= 2 && ahora - (c.t.oido || 0) > 3500) { suenaFicha(c.t); return; }
   /* cada ficha nueva suena una vez, de una en una; después se queda en silencio hasta que la cabeza se acerque o se pulse 🎧 */

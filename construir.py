@@ -241,6 +241,18 @@ cambia('<button class="btn s" id="bAcabar" type="button">Terminar la tanda</butt
 # --- el guion de lo añadido, dentro de la página ---
 cambia('</body>', '<script>\n' + (AQUI / 'extra.js').read_text(encoding='utf-8') + '</script>\n</body>')
 
+# --- ajustes del modo oído: pausa entre audios y volumen (pedido de una logopeda, 28/10/2026) ---
+cambia('<p class="nota" id="prAudioNota" style="text-align:left;margin:2px 0 0"></p>',
+       '<p class="nota" id="prAudioNota" style="text-align:left;margin:2px 0 0"></p>\n'
+       '        <div class="fila2" id="prOidoAj" style="display:none"><div class="campo"><label for="prPausa">Pausa entre audios</label><select id="prPausa"><option value="700">Normal</option><option value="2000">Larga</option><option value="4000">Muy larga</option></select></div>'
+       '<div class="campo"><label for="prVol">Volumen de la voz</label><select id="prVol"><option value="1">Normal</option><option value="1.6">Alto</option><option value="2.2">Más alto</option></select></div></div>')
+cambia("$('prAudio').checked = !!E.audio && oidoPosible; $('prAudio').disabled = !oidoPosible;",
+       "$('prAudio').checked = !!E.audio && oidoPosible; $('prAudio').disabled = !oidoPosible;\n"
+       "    $('prOidoAj').style.display = $('prAudio').checked ? '' : 'none'; $('prPausa').value = String(OIDO_AJ.pausa); $('prVol').value = String(OIDO_AJ.vol);")
+cambia("'prDirectas', 'prSolo', 'prAudio'].forEach(function (id) { $(id).onchange = function () { leeFormulario(); pintaPrepara(); }; });",
+       "'prDirectas', 'prSolo', 'prAudio'].forEach(function (id) { $(id).onchange = function () { leeFormulario(); pintaPrepara(); }; });\n"
+       "  $('prPausa').onchange = $('prVol').onchange = function () { OIDO_AJ.pausa = parseInt($('prPausa').value, 10); OIDO_AJ.vol = parseFloat($('prVol').value); guardaOidoAj(); };")
+
 (AQUI / 'index.html').write_text(s, encoding='utf-8')
 voz = AQUI / 'snake-voz'
 if voz.exists(): shutil.rmtree(voz)
